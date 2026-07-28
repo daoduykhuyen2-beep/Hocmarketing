@@ -5,8 +5,8 @@
 
 window.APP_CONFIG = {
   // --- SUPABASE (Project Settings → API) ---
-  SUPABASE_URL: "DÁN_PROJECT_URL_VÀO_ĐÂY",         // vd: https://abcxyz.supabase.co
-  SUPABASE_ANON_KEY: "DÁN_ANON_PUBLIC_KEY_VÀO_ĐÂY", // KHÔNG dùng service_role
+  SUPABASE_URL: "https://huhyttborjcqaeksjvei.supabase.co",         // vd: https://abcxyz.supabase.co
+  SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1aHl0dGJvcmpjcWFla3NqdmVpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyNjIxODcsImV4cCI6MjEwMDgzODE4N30.irJ3w0VbSVsHcjoAeDMcd4UMamhKUTqf5txcJx9a_D4", // KHÔNG dùng service_role
 
   // --- THƯƠNG HIỆU ---
   SITE_NAME: "Học Viện Marketing",
