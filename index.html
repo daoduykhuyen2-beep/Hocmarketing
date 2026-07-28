@@ -646,5 +646,122 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();['auth
 
 init();
 </script>
+
+<!-- ===== LỘ TRÌNH HỌC TUẦN TỰ (Sequential Learning) ===== -->
+<script>
+(function(){
+  window.COMPLETED = window.COMPLETED || new Set();
+
+  // Tải danh sách bài đã hoàn thành của user hiện tại
+  async function loadProgress(){
+    try{
+      window.COMPLETED = new Set();
+      if(typeof USER==='undefined' || !USER || typeof sb==='undefined') return;
+      const { data } = await sb.from('lesson_progress').select('lesson_id').eq('user_id', USER.id);
+      if(data) window.COMPLETED = new Set(data.map(function(x){return x.lesson_id;}));
+    }catch(e){ console.warn('loadProgress', e); }
+  }
+  window.loadProgress = loadProgress;
+
+  // Hook: mỗi khi loadEnrollments chạy (lúc đăng nhập/init) thì tải luôn tiến độ
+  if(typeof window.loadEnrollments==='function'){
+    const _le = window.loadEnrollments;
+    window.loadEnrollments = async function(){ const r = await _le.apply(this, arguments); await loadProgress(); return r; };
+  }
+
+  // Sau khi openCategory render xong danh sách bài -> áp dụng khoá tuần tự
+  function applyLock(){
+    const grid = document.getElementById('lessonGrid');
+    if(!grid) return;
+    const items = Array.prototype.slice.call(grid.querySelectorAll('.lesson'));
+    let prevDone = true; // bài đầu tiên luôn mở
+    items.forEach(function(el){
+      const oc = el.getAttribute('onclick') || '';
+      const m = oc.match(/playLesson\((?:'|")([^'"]+)(?:'|")\s*,\s*(true|false)/);
+      if(!m) return;
+      const lessonId = m[1];
+      const canPlay = m[2]==='true'; // đã mua khoá / free
+      const done = window.COMPLETED.has(lessonId);
+      const isFree = /class="free"/.test(el.innerHTML) || el.querySelector('.free');
+      // điều kiện mở: có quyền xem VÀ (bài trước đã xong hoặc đây là bài đầu) ; bài free luôn mở
+      const unlocked = (canPlay && (prevDone || done)) || isFree;
+      el.classList.remove('seq-locked','seq-done');
+      const badge = el.querySelector('.seq-badge'); if(badge) badge.remove();
+      if(done){
+        el.classList.add('seq-done');
+        const b=document.createElement('div'); b.className='seq-badge seq-badge-done'; b.textContent='✓'; el.appendChild(b);
+      }
+      if(!unlocked && canPlay){
+        el.classList.add('seq-locked');
+        const b=document.createElement('div'); b.className='seq-badge seq-badge-lock'; b.textContent='🔒'; el.appendChild(b);
+        el.setAttribute('onclick','');
+        el.onclick=function(ev){ ev.preventDefault(); ev.stopPropagation(); if(window.toast) toast('Hãy hoàn thành bài trước để mở bài này','err'); };
+      } else if(unlocked && canPlay){
+        // đảm bảo bấm được và gắn id để modal biết
+        el.setAttribute('data-lesson', lessonId);
+      }
+      // cập nhật trạng thái cho bài kế tiếp (chỉ tính các bài cần mua, bài free không ảnh hưởng chuỗi)
+      if(canPlay && !isFree){ prevDone = done; }
+    });
+  }
+  window.applySeqLock = applyLock;
+
+  if(typeof window.openCategory==='function'){
+    const _oc = window.openCategory;
+    window.openCategory = async function(){ const r = await _oc.apply(this, arguments); setTimeout(applyLock, 60); return r; };
+  }
+
+  // Nhúng nút "Đánh dấu đã học xong" vào modal video sau khi playLesson mở
+  let CURRENT_LESSON = null;
+  if(typeof window.playLesson==='function'){
+    const _pl = window.playLesson;
+    window.playLesson = async function(lessonId, canPlay){
+      CURRENT_LESSON = lessonId;
+      const r = await _pl.apply(this, arguments);
+      setTimeout(function(){ injectCompleteBtn(lessonId, canPlay); }, 80);
+      return r;
+    };
+  }
+
+  function injectCompleteBtn(lessonId, canPlay){
+    const info = document.getElementById('modalTitle');
+    const container = info ? info.parentElement : document.querySelector('#modal .modal-info');
+    if(!container) return;
+    let btn = document.getElementById('seqCompleteBtn');
+    if(btn) btn.remove();
+    if(!canPlay) return; // chưa mua thì không cho đánh dấu
+    btn = document.createElement('button');
+    btn.id='seqCompleteBtn'; btn.className='btn btn-ok';
+    btn.style.marginTop='12px';
+    const done = window.COMPLETED.has(lessonId);
+    btn.textContent = done ? '✓ Đã hoàn thành' : '✓ Đánh dấu đã học xong';
+    if(done) btn.disabled = true;
+    btn.onclick = async function(){
+      btn.disabled = true; btn.textContent='Đang lưu...';
+      try{
+        const { error } = await sb.rpc('complete_lesson', { p_lesson: lessonId });
+        if(error) throw error;
+        window.COMPLETED.add(lessonId);
+        btn.textContent='✓ Đã hoàn thành';
+        if(window.toast) toast('Đã hoàn thành bài học! Bài tiếp theo đã mở khoá.','ok');
+        if(window.closeModal) closeModal();
+        // render lại danh sách để mở bài kế tiếp
+        if(window.CURRENT && window.openCategory) window.openCategory(window.CURRENT.id);
+      }catch(e){
+        btn.disabled=false; btn.textContent='✓ Đánh dấu đã học xong';
+        if(window.toast) toast('Lỗi: '+(e.message||'không lưu được'),'err');
+      }
+    };
+    container.appendChild(btn);
+  }
+})();
+</script>
+<style>
+  .lesson.seq-locked{opacity:.55;filter:grayscale(.4);cursor:not-allowed}
+  .lesson{position:relative}
+  .seq-badge{position:absolute;top:8px;right:8px;z-index:5;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800}
+  .seq-badge-done{background:#16a34a;color:#fff}
+  .seq-badge-lock{background:rgba(0,0,0,.6);color:#fff}
+</style>
 </body>
 </html>
