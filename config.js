@@ -20,5 +20,5 @@ window.APP_CONFIG = {
     BANK_ACCOUNT_NAME: "DAO DUY KHUYEN",   // tên chủ tài khoản (viết HOA không dấu)
 
   // Liên hệ hỗ trợ (hiện ở trang nạp tiền)
-  SUPPORT_ZALO: ""                     // vd: https://zalo.me/0900000000 (để trống nếu chưa có)
+  SUPPORT_ZALO: "https://zalo.me/0981866736"                     // vd: https://zalo.me/0900000000 (để trống nếu chưa có)
 };
