@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quản trị · Học Viện Marketing</title>
+<style>
+  :root{
+    --bg:#0b1020;--bg2:#0f1630;--card:#141c3a;--card2:#1a2450;
+    --text:#eef2ff;--muted:#9aa7d0;--line:rgba(255,255,255,.09);
+    --brand:#6366f1;--brand2:#8b5cf6;--ok:#22c55e;--warn:#f59e0b;--danger:#ef4444;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    background:radial-gradient(900px 500px at 90% -10%,rgba(139,92,246,.18),transparent 60%),var(--bg);
+    color:var(--text);min-height:100vh}
+  a{color:var(--brand2)}
+  .wrap{max-width:1150px;margin:0 auto;padding:0 18px}
+  .btn{border:0;cursor:pointer;font-weight:700;border-radius:11px;padding:10px 16px;font-size:14px;transition:.18s;display:inline-flex;align-items:center;gap:7px}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn-primary{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff}
+  .btn-primary:hover:not(:disabled){transform:translateY(-1px)}
+  .btn-ghost{background:var(--card);color:var(--text);border:1px solid var(--line)}
+  .btn-ghost:hover{background:var(--card2)}
+  .btn-danger{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.4)}
+  .btn-danger:hover{background:rgba(239,68,68,.25)}
+  .btn-sm{padding:6px 11px;font-size:13px;border-radius:9px}
+  input,textarea,select{width:100%;background:var(--bg2);border:1px solid var(--line);color:var(--text);
+    border-radius:10px;padding:11px 13px;font-size:14px;font-family:inherit;outline:none}
+  input:focus,textarea:focus,select:focus{border-color:var(--brand)}
+  textarea{resize:vertical;min-height:70px}
+  label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:0 0 6px}
+  .field{margin-bottom:14px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+  /* LOGIN */
+  .login-wrap{min-height:100vh;display:grid;place-items:center;padding:20px}
+  .login-card{width:min(420px,100%);background:var(--card);border:1px solid var(--line);border-radius:20px;padding:34px;box-shadow:0 30px 60px -25px rgba(0,0,0,.7)}
+  .login-card .logo{font-size:34px;text-align:center}
+  .login-card h1{text-align:center;font-size:22px;margin:10px 0 4px}
+  .login-card .sub{text-align:center;color:var(--muted);font-size:14px;margin-bottom:24px}
+
+  /* APP */
+  #app{display:none}
+  .topbar{position:sticky;top:0;z-index:20;background:rgba(11,16,32,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .topbar .inner{display:flex;align-items:center;justify-content:space-between;height:62px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800}
+  .brand .m{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand2));display:grid;place-items:center;font-size:18px}
+  .who{color:var(--muted);font-size:13px;margin-right:8px}
+
+  .tabs{display:flex;gap:8px;margin:22px 0}
+  .tab{padding:9px 18px;border-radius:11px;cursor:pointer;font-weight:700;font-size:14px;background:var(--card);border:1px solid var(--line);color:var(--muted)}
+  .tab.active{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border-color:transparent}
+
+  .panel{display:none}
+  .panel.active{display:block}
+  .panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap}
+  .panel-head h2{font-size:20px}
+
+  .list{display:flex;flex-direction:column;gap:10px}
+  .item{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:14px}
+  .item .ic{width:44px;height:44px;border-radius:11px;display:grid;place-items:center;font-size:22px;background:var(--bg2);border:1px solid var(--line);flex:none}
+  .item .main{flex:1;min-width:0}
+  .item .main h4{font-size:15px;font-weight:800}
+  .item .main p{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .item .acts{display:flex;gap:7px;flex:none}
+  .item .thumb{width:76px;height:44px;border-radius:8px;object-fit:cover;background:var(--bg2);flex:none;border:1px solid var(--line)}
+  .tag{font-size:11px;font-weight:800;padding:3px 9px;border-radius:6px;background:var(--bg2);border:1px solid var(--line);color:var(--muted)}
+  .tag.free{color:#86efac;border-color:rgba(34,197,94,.35)}
+  .tag.price{color:#34d399;border-color:rgba(52,211,153,.4);font-weight:800}
+
+  .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+  .toolbar select{width:auto;min-width:220px}
+
+  /* MODAL */
+  .modal{position:fixed;inset:0;background:rgba(4,7,18,.8);backdrop-filter:blur(6px);z-index:60;display:none;align-items:flex-start;justify-content:center;padding:30px 16px;overflow:auto}
+  .modal.open{display:flex}
+  .modal-card{width:min(560px,100%);background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px;margin:auto}
+  .modal-card h3{font-size:19px;margin-bottom:18px}
+  .modal-foot{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
+
+  .up-row{display:flex;gap:10px;align-items:center}
+  .up-row input[type=text]{flex:1}
+  .filepick{position:relative;overflow:hidden}
+  .filepick input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+  .preview{margin-top:8px}
+  .preview img{max-height:90px;border-radius:8px;border:1px solid var(--line)}
+
+  .empty{text-align:center;padding:50px 20px;color:var(--muted)}
+  .empty .big{font-size:40px;margin-bottom:10px}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--card2);border:1px solid var(--line);
+    padding:12px 20px;border-radius:12px;font-weight:700;font-size:14px;z-index:100;display:none;box-shadow:0 12px 30px -10px #000}
+  .toast.show{display:block;animation:pop .25s}
+  @keyframes pop{from{transform:translate(-50%,10px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+  .toast.ok{border-color:rgba(34,197,94,.5)} .toast.err{border-color:rgba(239,68,68,.5)}
+  .msg{font-size:13px;margin-top:10px;text-align:center;min-height:18px}
+  .msg.err{color:#fca5a5} .msg.ok{color:#86efac}
+  .hint{font-size:12px;color:var(--muted);margin-top:5px}
+  .config-warn{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.4);color:#fcd34d;padding:14px 16px;border-radius:12px;font-size:14px;margin-bottom:18px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="loginView">
+  <div class="login-card">
+    <div class="logo">🔐</div>
+    <h1>Trang Quản Trị</h1>
+    <div class="sub">Đăng nhập để quản lý khoá học & bài giảng</div>
+    <div id="configWarn"></div>
+    <form id="loginForm" onsubmit="doLogin(event)">
+      <div class="field"><label>Email</label><input id="email" type="email" placeholder="admin@email.com" required></div>
+      <div class="field"><label>Mật khẩu</label><input id="password" type="password" placeholder="••••••••" required></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center" id="loginBtn" type="submit">Đăng nhập</button>
+      <div class="msg" id="loginMsg"></div>
+    </form>
+    <div class="hint" style="text-align:center;margin-top:16px">Tài khoản được tạo trong Supabase → Authentication → Users.<br>Xem file <b>HUONG-DAN.md</b>.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar"><div class="wrap inner">
+    <div class="brand"><span class="m">🎓</span> Quản trị khoá học</div>
+    <div><span class="who" id="whoami"></span><a class="btn btn-ghost btn-sm" href="index.html" target="_blank">Xem web ↗</a> <button class="btn btn-ghost btn-sm" onclick="doLogout()">Đăng xuất</button></div>
+  </div></div>
+
+  <div class="wrap">
+    <div id="adminWarn"></div>
+    <div class="tabs">
+      <div class="tab active" data-tab="cats" onclick="switchTab('cats')">📚 Khoá học</div>
+      <div class="tab" data-tab="lessons" onclick="switchTab('lessons')">🎬 Bài giảng</div>
+      <div class="tab" data-tab="students" onclick="switchTab('students')">👥 Học viên</div>
+      <div class="tab" data-tab="packages" onclick="switchTab('packages')">👑 Gói VIP</div>
+      <div class="tab" data-tab="topups" onclick="switchTab('topups')">💳 Nạp tiền</div>
+    </div>
+
+    <!-- CATEGORIES PANEL -->
+    <div class="panel active" id="panel-cats">
+      <div class="panel-head">
+        <h2>Danh mục khoá học</h2>
+        <button class="btn btn-primary" onclick="openCatModal()">+ Thêm khoá học</button>
+      </div>
+      <div class="list" id="catList"></div>
+    </div>
+
+    <!-- LESSONS PANEL -->
+    <div class="panel" id="panel-lessons">
+      <div class="panel-head">
+        <h2>Bài giảng</h2>
+        <button class="btn btn-primary" onclick="openLessonModal()">+ Thêm bài giảng</button>
+      </div>
+      <div class="toolbar">
+        <label style="margin:0">Lọc theo khoá:</label>
+        <select id="filterCat" onchange="renderLessons()"><option value="">Tất cả khoá học</option></select>
+      </div>
+      <div class="list" id="lessonList"></div>
+    </div>
+
+    <!-- STUDENTS PANEL -->
+    <div class="panel" id="panel-students">
+      <div class="panel-head"><h2>Học viên</h2><button class="btn btn-ghost" onclick="loadStudents()">🔄 Làm mới</button></div>
+      <div class="toolbar"><input id="studentSearch" placeholder="Tìm theo email…" oninput="renderStudents()" style="max-width:280px"></div>
+      <div class="list" id="studentList"></div>
+    </div>
+
+    <!-- PACKAGES PANEL -->
+    <div class="panel" id="panel-packages">
+      <div class="panel-head"><h2>Gói VIP</h2><button class="btn btn-primary" onclick="openPkgModal()">+ Thêm gói</button></div>
+      <div class="list" id="pkgList"></div>
+    </div>
+
+    <!-- TOPUPS PANEL -->
+    <div class="panel" id="panel-topups">
+      <div class="panel-head"><h2>Nạp tiền & giao dịch</h2><button class="btn btn-ghost" onclick="loadTopups()">🔄 Làm mới</button></div>
+      <h3 style="margin:6px 0 10px;font-size:16px">Yêu cầu nạp đang chờ</h3>
+      <div class="list" id="topupList"></div>
+      <h3 style="margin:22px 0 10px;font-size:16px">Giao dịch gần đây</h3>
+      <div class="list" id="txList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PACKAGE MODAL -->
+<div class="modal" id="pkgModal">
+  <div class="modal-card">
+    <h3 id="pkgModalTitle">Thêm gói VIP</h3>
+    <input type="hidden" id="pkgId">
+    <div class="field"><label>Tên gói *</label><input id="pkgName" placeholder="VD: VIP 1 Tháng"></div>
+    <div class="row">
+      <div class="field"><label>Giá (VND) *</label><input id="pkgPrice" type="number" placeholder="199000"></div>
+      <div class="field"><label>Số ngày (trống = trọn đời)</label><input id="pkgDur" type="number" placeholder="30"></div>
+    </div>
+    <div class="field"><label>Mô tả</label><textarea id="pkgDesc" placeholder="Mở tất cả khoá trong 30 ngày"></textarea></div>
+    <div class="row">
+      <div class="field"><label>Thứ tự</label><input id="pkgOrder" type="number" value="0"></div>
+      <div class="field"><label style="display:flex;gap:8px;align-items:center;cursor:pointer;margin-top:26px"><input type="checkbox" id="pkgActive" checked style="width:auto"> Đang bán</label></div>
+    </div>
+    <div class="msg" id="pkgMsg"></div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('pkgModal')">Huỷ</button><button class="btn btn-primary" id="pkgSaveBtn" onclick="savePkg()">Lưu</button></div>
+  </div>
+</div>
+
+<!-- CATEGORY MODAL -->
+<div class="modal" id="catModal">
+  <div class="modal-card">
+    <h3 id="catModalTitle">Thêm khoá học</h3>
+    <input type="hidden" id="catId">
+    <div class="row">
+      <div class="field"><label>Tên khoá học *</label><input id="catName" placeholder="VD: TikTok Marketing"></div>
+      <div class="field"><label>Slug (đường dẫn)</label><input id="catSlug" placeholder="tiktok"></div>
+    </div>
+    <div class="field"><label>Mô tả ngắn</label><textarea id="catDesc" placeholder="Giới thiệu ngắn về khoá học"></textarea></div>
+    <div class="field"><label>Link thư mục Google Drive</label><input id="catDrive" placeholder="https://drive.google.com/drive/folders/..."><div class="hint">Bấm vào thẻ khoá học ngoài trang chủ sẽ mở thư mục này (nếu mục chưa có bài giảng lẻ).</div></div>
+    <div class="row">
+      <div class="field"><label>Icon (emoji)</label><input id="catIcon" placeholder="🎵" maxlength="4"></div>
+      <div class="field"><label>Màu chủ đạo</label><input id="catColor" type="color" value="#6366f1" style="height:44px;padding:5px"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>💵 Giá bán (VND)</label><input id="catPrice" type="number" placeholder="VD: 500000"><div class="hint" id="catPriceHint">Để trống = “Liên hệ”. Nhập 0 = “Miễn phí”.</div></div>
+      <div class="field"><label>Giá gốc (VND) — gạch ngang</label><input id="catOrig" type="number" placeholder="VD: 1000000"><div class="hint">Cao hơn giá bán để hiện khuyến mãi.</div></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Số khoá (hiển thị)</label><input id="catCount" type="number" placeholder="VD: 15"></div>
+      <div class="field"><label>Thứ tự hiển thị</label><input id="catOrder" type="number" value="0"></div>
+    </div>
+    <div class="msg" id="catMsg"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('catModal')">Huỷ</button>
+      <button class="btn btn-primary" id="catSaveBtn" onclick="saveCat()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON MODAL -->
+<div class="modal" id="lessonModal">
+  <div class="modal-card">
+    <h3 id="lessonModalTitle">Thêm bài giảng</h3>
+    <input type="hidden" id="lessonId">
+    <div class="field"><label>Khoá học *</label><select id="lessonCat"></select></div>
+    <div class="field"><label>Tiêu đề bài giảng *</label><input id="lessonTitle" placeholder="VD: Bài 1 — Xây kênh TikTok từ 0"></div>
+    <div class="field"><label>Mô tả</label><textarea id="lessonDesc" placeholder="Nội dung bài học"></textarea></div>
+    <div class="field">
+      <label>Link video (YouTube / Vimeo / Google Drive / MP4)</label>
+      <div class="up-row">
+        <input type="text" id="lessonVideo" placeholder="https://youtube.com/watch?v=...">
+        <label class="btn btn-ghost filepick" title="Tải file video lên Supabase">⬆ File<input type="file" accept="video/*" onchange="uploadFile(this,'lessonVideo','video')"></label>
+      </div>
+      <div class="hint">Khuyên dùng link YouTube/Drive cho nhẹ. Tải file trực tiếp chỉ nên dùng cho video ngắn (Storage miễn phí ~1GB).</div>
+    </div>
+    <div class="field">
+      <label>Ảnh thumbnail</label>
+      <div class="up-row">
+        <input type="text" id="lessonThumb" placeholder="Dán link ảnh hoặc bấm tải lên →">
+        <label class="btn btn-ghost filepick">⬆ Ảnh<input type="file" accept="image/*" onchange="uploadFile(this,'lessonThumb','image')"></label>
+      </div>
+      <div class="preview" id="thumbPreview"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Thời lượng</label><input id="lessonDur" placeholder="12:30"></div>
+      <div class="field"><label>Thứ tự</label><input id="lessonOrder" type="number" value="0"></div>
+    </div>
+    <div class="field"><label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="lessonFree" checked style="width:auto"> Bài học miễn phí</label></div>
+    <div class="msg" id="lessonMsg"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('lessonModal')">Huỷ</button>
+      <button class="btn btn-primary" id="lessonSaveBtn" onclick="saveLesson()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const cfg = window.APP_CONFIG || {};
+const BUCKET = cfg.STORAGE_BUCKET || 'media';
+const configured = cfg.SUPABASE_URL && cfg.SUPABASE_URL.startsWith('http') && cfg.SUPABASE_ANON_KEY && cfg.SUPABASE_ANON_KEY.length>20;
+let sb=null;
+if(configured){ sb = supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY); }
+else{
+  document.getElementById('configWarn').innerHTML =
+   '<div class="config-warn">⚠️ Chưa cấu hình Supabase. Hãy điền <b>SUPABASE_URL</b> và <b>SUPABASE_ANON_KEY</b> trong file <b>config.js</b> rồi tải lại trang. Xem <b>HUONG-DAN.md</b>.</div>';
+  document.getElementById('loginBtn').disabled = true;
+}
+
+let CATS=[], LESSONS=[];
+
+/* ---------- AUTH ---------- */
+async function init(){
+  if(!configured) return;
+  const {data:{session}} = await sb.auth.getSession();
+  if(session) enterApp(session.user);
+}
+async function doLogin(e){
+  e.preventDefault();
+  const msg=document.getElementById('loginMsg'); msg.className='msg'; msg.textContent='Đang đăng nhập…';
+  const {data,error} = await sb.auth.signInWithPassword({
+    email:document.getElementById('email').value.trim(),
+    password:document.getElementById('password').value
+  });
+  if(error){ msg.className='msg err'; msg.textContent='✕ '+viErr(error.message); return; }
+  enterApp(data.user);
+}
+async function enterApp(user){
+  document.getElementById('loginView').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('whoami').textContent = user.email;
+  // Kiểm tra quyền admin
+  const {data:prof} = await sb.from('profiles').select('is_admin').eq('id',user.id).maybeSingle();
+  if(!prof || !prof.is_admin){
+    document.getElementById('adminWarn').innerHTML =
+      `<div class="config-warn">⛔ Tài khoản <b>${user.email}</b> chưa có quyền admin. Vào Supabase → SQL Editor chạy:<br>
+      <code>update public.profiles set is_admin = true where email = '${user.email}';</code><br>rồi tải lại trang.</div>`;
+  }
+  loadAll();
+}
+async function doLogout(){ await sb.auth.signOut(); location.reload(); }
+
+/* ---------- LOAD DATA ---------- */
+async function loadAll(){ await loadCats(); await loadLessons(); }
+async function loadCats(){
+  const {data,error} = await sb.from('categories').select('*').order('sort_order');
+  if(error){ toast('Lỗi tải khoá học: '+error.message,'err'); return; }
+  CATS = data||[]; renderCats(); fillCatSelects();
+}
+async function loadLessons(){
+  const {data,error} = await sb.from('lessons').select('*').order('sort_order');
+  if(error){ toast('Lỗi tải bài giảng: '+error.message,'err'); return; }
+  LESSONS = data||[]; renderLessons();
+}
+
+/* ---------- RENDER CATEGORIES ---------- */
+function renderCats(){
+  const el=document.getElementById('catList');
+  if(!CATS.length){ el.innerHTML='<div class="empty"><div class="big">📭</div>Chưa có khoá học. Bấm “+ Thêm khoá học”.</div>'; return; }
+  el.innerHTML = CATS.map(c=>{
+    const n = LESSONS.filter(l=>l.category_id===c.id).length;
+    const sub = c.drive_url ? '📁 <a href="'+esc(c.drive_url)+'" target="_blank" rel="noopener">Thư mục Drive</a>' : (esc(c.description||'')||'—');
+    return `<div class="item">
+      <div class="ic" style="background:${c.color}22;border-color:${c.color}55">${c.icon||'📚'}</div>
+      <div class="main"><h4>${esc(c.name)}</h4><p>${sub}</p></div>
+      ${c.course_count?`<span class="tag">${c.course_count} khoá</span>`:''}
+      <span class="tag price">${fmtVND(c)}</span>
+      <span class="tag">${n} bài</span>
+      <div class="acts">
+        <button class="btn btn-ghost btn-sm" onclick='editCat(${JSON.stringify(c.id)})'>✏️ Sửa</button>
+        <button class="btn btn-danger btn-sm" onclick='delCat(${JSON.stringify(c.id)})'>🗑</button>
+      </div></div>`;
+  }).join('');
+}
+function fillCatSelects(){
+  const opts = CATS.map(c=>`<option value="${c.id}">${esc(c.icon||'')} ${esc(c.name)}</option>`).join('');
+  document.getElementById('lessonCat').innerHTML = opts || '<option value="">(Chưa có khoá học)</option>';
+  document.getElementById('filterCat').innerHTML = '<option value="">Tất cả khoá học</option>'+opts;
+}
+
+/* ---------- CATEGORY MODAL ---------- */
+function openCatModal(){
+  document.getElementById('catModalTitle').textContent='Thêm khoá học';
+  ['catId','catName','catSlug','catDesc','catIcon','catDrive','catCount','catPrice','catOrig'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('catIcon').value='📚';
+  document.getElementById('catColor').value='#6366f1';
+  document.getElementById('catOrder').value=CATS.length+1;
+  document.getElementById('catMsg').textContent='';
+  openModal('catModal');
+}
+function editCat(id){
+  const c=CATS.find(x=>x.id===id); if(!c)return;
+  document.getElementById('catModalTitle').textContent='Sửa khoá học';
+  document.getElementById('catId').value=c.id;
+  document.getElementById('catName').value=c.name;
+  document.getElementById('catSlug').value=c.slug;
+  document.getElementById('catDesc').value=c.description||'';
+  document.getElementById('catIcon').value=c.icon||'📚';
+  document.getElementById('catColor').value=c.color||'#6366f1';
+  document.getElementById('catDrive').value=c.drive_url||'';
+  document.getElementById('catCount').value=(c.course_count!=null?c.course_count:'');
+  document.getElementById('catPrice').value=(c.price!=null?c.price:'');
+  document.getElementById('catOrig').value=(c.original_price!=null?c.original_price:'');
+  document.getElementById('catOrder').value=c.sort_order||0;
+  document.getElementById('catMsg').textContent='';
+  openModal('catModal');
+}
+function slugify(s){return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/đ/g,'d').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
+async function saveCat(){
+  const msg=document.getElementById('catMsg'); msg.className='msg';
+  const name=document.getElementById('catName').value.trim();
+  if(!name){ msg.className='msg err'; msg.textContent='Nhập tên khoá học.'; return; }
+  let slug=document.getElementById('catSlug').value.trim()||slugify(name);
+  const cntRaw=document.getElementById('catCount').value.trim();
+  const priceRaw=document.getElementById('catPrice').value.trim();
+  const origRaw=document.getElementById('catOrig').value.trim();
+  const rec={ name, slug, description:document.getElementById('catDesc').value.trim(),
+    icon:document.getElementById('catIcon').value.trim()||'📚',
+    color:document.getElementById('catColor').value,
+    drive_url:document.getElementById('catDrive').value.trim(),
+    course_count:cntRaw===''?null:(parseInt(cntRaw)||null),
+    price:priceRaw===''?null:(parseInt(priceRaw)||0),
+    original_price:origRaw===''?null:(parseInt(origRaw)||null),
+    sort_order:parseInt(document.getElementById('catOrder').value)||0 };
+  const id=document.getElementById('catId').value;
+  const btn=document.getElementById('catSaveBtn'); btn.disabled=true; btn.textContent='Đang lưu…';
+  let error;
+  if(id){ ({error}=await sb.from('categories').update(rec).eq('id',id)); }
+  else  { ({error}=await sb.from('categories').insert(rec)); }
+  btn.disabled=false; btn.textContent='Lưu';
+  if(error){ msg.className='msg err'; msg.textContent='✕ '+error.message; return; }
+  closeModal('catModal'); toast('Đã lưu khoá học ✓','ok'); await loadAll();
+}
+async function delCat(id){
+  const c=CATS.find(x=>x.id===id);
+  const n=LESSONS.filter(l=>l.category_id===id).length;
+  if(!confirm(`Xoá khoá "${c.name}"?`+(n?`\nSẽ xoá luôn ${n} bài giảng bên trong.`:''))) return;
+  const {error}=await sb.from('categories').delete().eq('id',id);
+  if(error){ toast('Lỗi: '+error.message,'err'); return; }
+  toast('Đã xoá ✓','ok'); await loadAll();
+}
+
+/* ---------- RENDER LESSONS ---------- */
+function renderLessons(){
+  const f=document.getElementById('filterCat').value;
+  const list = f? LESSONS.filter(l=>l.category_id===f) : LESSONS;
+  const el=document.getElementById('lessonList');
+  if(!list.length){ el.innerHTML='<div class="empty"><div class="big">🎬</div>Chưa có bài giảng. Bấm “+ Thêm bài giảng”.</div>'; return; }
+  el.innerHTML = list.map(l=>{
+    const c=CATS.find(x=>x.id===l.category_id);
+    return `<div class="item">
+      ${l.thumbnail_url?`<img class="thumb" src="${esc(l.thumbnail_url)}">`:`<div class="thumb" style="display:grid;place-items:center;font-size:20px">🎬</div>`}
+      <div class="main"><h4>${esc(l.title)}</h4>
+        <p>${c?esc((c.icon||'')+' '+c.name):'—'} · ${l.duration||'—'} ${l.video_url?'· 🔗 có video':'· ⚠️ chưa có video'}</p></div>
+      ${l.is_free?'<span class="tag free">Miễn phí</span>':''}
+      <div class="acts">
+        <button class="btn btn-ghost btn-sm" onclick='editLesson(${JSON.stringify(l.id)})'>✏️ Sửa</button>
+        <button class="btn btn-danger btn-sm" onclick='delLesson(${JSON.stringify(l.id)})'>🗑</button>
+      </div></div>`;
+  }).join('');
+}
+
+/* ---------- LESSON MODAL ---------- */
+function openLessonModal(){
+  if(!CATS.length){ toast('Hãy tạo ít nhất 1 khoá học trước.','err'); switchTab('cats'); return; }
+  document.getElementById('lessonModalTitle').textContent='Thêm bài giảng';
+  ['lessonId','lessonTitle','lessonDesc','lessonVideo','lessonThumb','lessonDur'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('lessonOrder').value='0';
+  document.getElementById('lessonFree').checked=true;
+  const f=document.getElementById('filterCat').value; if(f)document.getElementById('lessonCat').value=f;
+  document.getElementById('thumbPreview').innerHTML='';
+  document.getElementById('lessonMsg').textContent='';
+  openModal('lessonModal');
+}
+function editLesson(id){
+  const l=LESSONS.find(x=>x.id===id); if(!l)return;
+  document.getElementById('lessonModalTitle').textContent='Sửa bài giảng';
+  document.getElementById('lessonId').value=l.id;
+  document.getElementById('lessonCat').value=l.category_id;
+  document.getElementById('lessonTitle').value=l.title;
+  document.getElementById('lessonDesc').value=l.description||'';
+  document.getElementById('lessonVideo').value=l.video_url||'';
+  document.getElementById('lessonThumb').value=l.thumbnail_url||'';
+  document.getElementById('lessonDur').value=l.duration||'';
+  document.getElementById('lessonOrder').value=l.sort_order||0;
+  document.getElementById('lessonFree').checked=!!l.is_free;
+  document.getElementById('thumbPreview').innerHTML=l.thumbnail_url?`<img src="${esc(l.thumbnail_url)}">`:'';
+  document.getElementById('lessonMsg').textContent='';
+  openModal('lessonModal');
+}
+async function saveLesson(){
+  const msg=document.getElementById('lessonMsg'); msg.className='msg';
+  const title=document.getElementById('lessonTitle').value.trim();
+  const category_id=document.getElementById('lessonCat').value;
+  if(!category_id){ msg.className='msg err'; msg.textContent='Chọn khoá học.'; return; }
+  if(!title){ msg.className='msg err'; msg.textContent='Nhập tiêu đề.'; return; }
+  const rec={ category_id, title,
+    description:document.getElementById('lessonDesc').value.trim(),
+    video_url:document.getElementById('lessonVideo').value.trim(),
+    thumbnail_url:document.getElementById('lessonThumb').value.trim(),
+    duration:document.getElementById('lessonDur').value.trim(),
+    sort_order:parseInt(document.getElementById('lessonOrder').value)||0,
+    is_free:document.getElementById('lessonFree').checked };
+  const id=document.getElementById('lessonId').value;
+  const btn=document.getElementById('lessonSaveBtn'); btn.disabled=true; btn.textContent='Đang lưu…';
+  let error;
+  if(id){ ({error}=await sb.from('lessons').update(rec).eq('id',id)); }
+  else  { ({error}=await sb.from('lessons').insert(rec)); }
+  btn.disabled=false; btn.textContent='Lưu';
+  if(error){ msg.className='msg err'; msg.textContent='✕ '+error.message; return; }
+  closeModal('lessonModal'); toast('Đã lưu bài giảng ✓','ok'); await loadLessons();
+}
+async function delLesson(id){
+  const l=LESSONS.find(x=>x.id===id);
+  if(!confirm(`Xoá bài giảng "${l.title}"?`)) return;
+  const {error}=await sb.from('lessons').delete().eq('id',id);
+  if(error){ toast('Lỗi: '+error.message,'err'); return; }
+  toast('Đã xoá ✓','ok'); await loadLessons();
+}
+
+/* ---------- UPLOAD FILE TO STORAGE ---------- */
+async function uploadFile(input, targetId, kind){
+  const file=input.files[0]; if(!file) return;
+  const target=document.getElementById(targetId);
+  const maxMB = kind==='video'?500:8;
+  const sizeMB = (file.size/1024/1024).toFixed(1);
+  if(file.size > maxMB*1024*1024){ toast(`File ${sizeMB}MB quá lớn (giới hạn ${maxMB}MB). Video dài nên để trên Drive/YouTube.`,'err'); input.value=''; return; }
+  const ext=(file.name.split('.').pop()||'bin').toLowerCase();
+  const path=`${kind}/${Date.now()}_${Math.floor(Math.random()*1e6)}.${ext}`;
+  const old=target.value; target.value=`⏳ Đang tải lên ${sizeMB}MB…`; target.disabled=true;
+  toast(`Đang tải ${sizeMB}MB, vui lòng đợi…`);
+  const {error}=await sb.storage.from(BUCKET).upload(path,file,{cacheControl:'3600',upsert:false});
+  target.disabled=false;
+  if(error){ target.value=old; toast('Lỗi upload: '+error.message,'err'); input.value=''; return; }
+  const {data}=sb.storage.from(BUCKET).getPublicUrl(path);
+  target.value=data.publicUrl;
+  if(targetId==='lessonThumb') document.getElementById('thumbPreview').innerHTML=`<img src="${data.publicUrl}">`;
+  toast('Tải lên xong ✓','ok'); input.value='';
+}
+
+/* ========== HỌC VIÊN ========== */
+let STUDENTS=[];
+async function loadStudents(){
+  const el=document.getElementById('studentList'); el.innerHTML='<div class="empty">Đang tải…</div>';
+  const {data,error}=await sb.from('profiles').select('*').order('created_at',{ascending:false});
+  if(error){ el.innerHTML='<div class="empty">Lỗi: '+esc(error.message)+'</div>'; return; }
+  STUDENTS=data||[]; renderStudents();
+}
+function vnd(n){return Number(n||0).toLocaleString('vi-VN')+'đ';}
+function isVip(p){return p.vip_until && new Date(p.vip_until)>new Date();}
+function renderStudents(){
+  const q=(document.getElementById('studentSearch').value||'').toLowerCase();
+  const list=STUDENTS.filter(s=>!q||(s.email||'').toLowerCase().includes(q));
+  const el=document.getElementById('studentList');
+  if(!list.length){ el.innerHTML='<div class="empty"><div class="big">👥</div>Chưa có học viên.</div>'; return; }
+  el.innerHTML=list.map(s=>`<div class="item">
+    <div class="ic">${(s.email||'?')[0].toUpperCase()}</div>
+    <div class="main"><h4>${esc(s.email||'—')} ${s.is_admin?'<span class="tag">ADMIN</span>':''} ${isVip(s)?'<span class="tag free">VIP</span>':''}</h4>
+      <p>Số dư: <b style="color:#34d399">${vnd(s.balance)}</b>${isVip(s)?' · VIP đến '+new Date(s.vip_until).toLocaleDateString('vi-VN'):''}</p></div>
+    <div class="acts"><button class="btn btn-ghost btn-sm" onclick='creditStudent(${JSON.stringify(s.id)},${JSON.stringify(s.email||"")})'>💵 Cộng tiền</button></div>
+  </div>`).join('');
+}
+async function creditStudent(id,email){
+  const v=prompt(`Cộng tiền cho ${email}\nNhập số tiền (âm để trừ):`,'100000');
+  if(v===null)return; const amt=parseInt(v); if(!amt){toast('Số tiền không hợp lệ','err');return;}
+  const {data,error}=await sb.rpc('admin_credit',{target:id,amt:amt,note:'Admin điều chỉnh'});
+  if(error){toast('Lỗi: '+error.message,'err');return;}
+  if(!data.ok){toast(data.message,'err');return;}
+  toast('Đã cập nhật số dư ✓','ok'); loadStudents();
+}
+
+/* ========== GÓI VIP ========== */
+let PKGS=[];
+async function loadPackages(){
+  const el=document.getElementById('pkgList'); el.innerHTML='<div class="empty">Đang tải…</div>';
+  const {data,error}=await sb.from('packages').select('*').order('sort_order');
+  if(error){ el.innerHTML='<div class="empty">Lỗi: '+esc(error.message)+'</div>'; return; }
+  PKGS=data||[]; renderPackages();
+}
+function renderPackages(){
+  const el=document.getElementById('pkgList');
+  if(!PKGS.length){ el.innerHTML='<div class="empty"><div class="big">👑</div>Chưa có gói. Bấm “+ Thêm gói”.</div>'; return; }
+  el.innerHTML=PKGS.map(p=>`<div class="item">
+    <div class="ic">👑</div>
+    <div class="main"><h4>${esc(p.name)} ${p.active?'':'<span class="tag">Ẩn</span>'}</h4>
+      <p>${vnd(p.price)} · ${p.duration_days?p.duration_days+' ngày':'Trọn đời'} · ${esc(p.description||'')}</p></div>
+    <div class="acts">
+      <button class="btn btn-ghost btn-sm" onclick='editPkg(${JSON.stringify(p.id)})'>✏️ Sửa</button>
+      <button class="btn btn-danger btn-sm" onclick='delPkg(${JSON.stringify(p.id)})'>🗑</button>
+    </div></div>`).join('');
+}
+function openPkgModal(){
+  document.getElementById('pkgModalTitle').textContent='Thêm gói VIP';
+  ['pkgId','pkgName','pkgPrice','pkgDur','pkgDesc'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('pkgOrder').value=(PKGS.length+1); document.getElementById('pkgActive').checked=true;
+  document.getElementById('pkgMsg').textContent=''; openModal('pkgModal');
+}
+function editPkg(id){
+  const p=PKGS.find(x=>x.id===id); if(!p)return;
+  document.getElementById('pkgModalTitle').textContent='Sửa gói VIP';
+  document.getElementById('pkgId').value=p.id;
+  document.getElementById('pkgName').value=p.name;
+  document.getElementById('pkgPrice').value=p.price;
+  document.getElementById('pkgDur').value=p.duration_days!=null?p.duration_days:'';
+  document.getElementById('pkgDesc').value=p.description||'';
+  document.getElementById('pkgOrder').value=p.sort_order||0;
+  document.getElementById('pkgActive').checked=!!p.active;
+  document.getElementById('pkgMsg').textContent=''; openModal('pkgModal');
+}
+async function savePkg(){
+  const msg=document.getElementById('pkgMsg'); msg.className='msg';
+  const name=document.getElementById('pkgName').value.trim();
+  const price=parseInt(document.getElementById('pkgPrice').value);
+  if(!name||!price){ msg.className='msg err'; msg.textContent='Nhập tên và giá.'; return; }
+  const durRaw=document.getElementById('pkgDur').value.trim();
+  const rec={ name, price, duration_days:durRaw===''?null:(parseInt(durRaw)||null),
+    description:document.getElementById('pkgDesc').value.trim(),
+    sort_order:parseInt(document.getElementById('pkgOrder').value)||0,
+    active:document.getElementById('pkgActive').checked };
+  const id=document.getElementById('pkgId').value;
+  let error;
+  if(id){ ({error}=await sb.from('packages').update(rec).eq('id',id)); }
+  else  { ({error}=await sb.from('packages').insert(rec)); }
+  if(error){ msg.className='msg err'; msg.textContent='✕ '+error.message; return; }
+  closeModal('pkgModal'); toast('Đã lưu gói ✓','ok'); loadPackages();
+}
+async function delPkg(id){
+  if(!confirm('Xoá gói này?'))return;
+  const {error}=await sb.from('packages').delete().eq('id',id);
+  if(error){toast('Lỗi: '+error.message,'err');return;}
+  toast('Đã xoá ✓','ok'); loadPackages();
+}
+
+/* ========== NẠP TIỀN & GIAO DỊCH ========== */
+async function loadTopups(){
+  const tl=document.getElementById('topupList'), xl=document.getElementById('txList');
+  tl.innerHTML='<div class="empty">Đang tải…</div>'; xl.innerHTML='';
+  const {data:tps}=await sb.from('topup_requests').select('*').eq('status','pending').order('created_at',{ascending:false}).limit(50);
+  if(!tps||!tps.length){ tl.innerHTML='<div class="empty">Không có yêu cầu nạp đang chờ.</div>'; }
+  else tl.innerHTML=tps.map(t=>`<div class="item">
+    <div class="ic">💳</div>
+    <div class="main"><h4>${vnd(t.amount)} · <span style="font-family:monospace">${esc(t.code)}</span></h4>
+      <p>${new Date(t.created_at).toLocaleString('vi-VN')}</p></div>
+    <div class="acts"><button class="btn btn-primary btn-sm" onclick='confirmTopup(${JSON.stringify(t.id)})'>✓ Duyệt (cộng tiền)</button></div>
+  </div>`).join('');
+  const {data:txs}=await sb.from('wallet_tx').select('*').order('created_at',{ascending:false}).limit(40);
+  xl.innerHTML=(txs&&txs.length)?txs.map(t=>`<div class="item"><div class="ic">${t.amount>=0?'➕':'➖'}</div>
+    <div class="main"><h4 style="color:${t.amount>=0?'#34d399':'#fca5a5'}">${t.amount>=0?'+':''}${vnd(t.amount)}</h4>
+      <p>${esc(t.type)} · ${esc(t.note||'')} · ${new Date(t.created_at).toLocaleString('vi-VN')}</p></div></div>`).join('')
+    :'<div class="empty">Chưa có giao dịch.</div>';
+}
+async function confirmTopup(id){
+  if(!confirm('Xác nhận đã nhận tiền và cộng vào ví học viên?'))return;
+  const {data,error}=await sb.rpc('admin_confirm_topup',{tid:id});
+  if(error){toast('Lỗi: '+error.message,'err');return;}
+  if(!data.ok){toast(data.message,'err');return;}
+  toast('Đã cộng tiền ✓','ok'); loadTopups();
+}
+
+/* ---------- UI HELPERS ---------- */
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===t));
+  ['cats','lessons','students','packages','topups'].forEach(k=>
+    document.getElementById('panel-'+k).classList.toggle('active',t===k));
+  if(t==='students') loadStudents();
+  if(t==='packages') loadPackages();
+  if(t==='topups') loadTopups();
+}
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+function toast(text,type){const t=document.getElementById('toast');t.textContent=text;t.className='toast show '+(type||'');clearTimeout(window._tt);window._tt=setTimeout(()=>t.className='toast',2600);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function fmtVND(c){ if(c.price===0) return 'Miễn phí'; if(c.price>0) return Number(c.price).toLocaleString('vi-VN')+'đ'; return 'Liên hệ'; }
+function viErr(m){ if(/Invalid login/i.test(m)) return 'Sai email hoặc mật khẩu.'; if(/Email not confirmed/i.test(m)) return 'Email chưa xác nhận. Vào Supabase → Auth → Users để xác nhận.'; return m; }
+
+document.getElementById('lessonThumb') && document.getElementById('lessonThumb').addEventListener('input',e=>{
+  document.getElementById('thumbPreview').innerHTML = e.target.value?`<img src="${esc(e.target.value)}">`:'';
+});
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Học Viện Marketing — Khoá học thực chiến</title>
+<meta name="description" content="Nền tảng khoá học marketing: ChatGPT, Affiliate, Canva, CapCut, Facebook, Livestream, TikTok, Zalo.">
+<style>
+  :root{
+    --bg:#0b1020;--bg2:#0f1630;--card:#141c3a;--card2:#1a2450;
+    --text:#eef2ff;--muted:#9aa7d0;--line:rgba(255,255,255,.09);
+    --brand:#6366f1;--brand2:#8b5cf6;--accent:#22d3ee;--ok:#34d399;--warn:#f59e0b;--danger:#ef4444;
+    --radius:18px;--shadow:0 20px 50px -20px rgba(0,0,0,.6);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    background:radial-gradient(1200px 600px at 80% -10%,rgba(139,92,246,.25),transparent 60%),
+               radial-gradient(1000px 500px at -10% 10%,rgba(34,211,238,.18),transparent 55%),var(--bg);
+    color:var(--text);min-height:100vh;line-height:1.6}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1200px;margin:0 auto;padding:0 20px}
+  input,select{width:100%;background:var(--bg2);border:1px solid var(--line);color:var(--text);border-radius:11px;padding:12px 14px;font-size:15px;font-family:inherit;outline:none}
+  input:focus,select:focus{border-color:var(--brand)}
+  label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:0 0 6px}
+  .field{margin-bottom:14px}
+
+  header{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(11,16,32,.78);border-bottom:1px solid var(--line)}
+  .nav{display:flex;align-items:center;justify-content:space-between;height:66px;gap:12px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px}
+  .logo .mark{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(135deg,var(--brand),var(--brand2));font-size:19px}
+  .nav-actions{display:flex;gap:10px;align-items:center}
+  .btn{border:0;cursor:pointer;font-weight:700;border-radius:12px;padding:10px 18px;font-size:14px;transition:.2s;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn-ghost{background:var(--card);color:var(--text);border:1px solid var(--line)}
+  .btn-ghost:hover{background:var(--card2)}
+  .btn-primary{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff}
+  .btn-primary:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 30px -8px rgba(99,102,241,.7)}
+  .btn-ok{background:linear-gradient(135deg,#10b981,#22d3ee);color:#04121a}
+  .btn-block{width:100%;justify-content:center}
+  .btn-lg{padding:13px 22px;font-size:15px}
+
+  /* ACCOUNT CHIP */
+  .chip{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px 8px 6px 12px;cursor:pointer}
+  .chip:hover{background:var(--card2)}
+  .chip .bal{font-weight:800;color:var(--ok);font-size:14px}
+  .chip .av{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--brand2));display:grid;place-items:center;font-weight:800;font-size:14px}
+  .menu{position:absolute;top:60px;right:20px;width:240px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px;box-shadow:var(--shadow);z-index:60;display:none}
+  .menu.open{display:block}
+  .menu .mi{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;cursor:pointer;font-weight:600;font-size:14px}
+  .menu .mi:hover{background:var(--card2)}
+  .menu .head{padding:10px 12px;border-bottom:1px solid var(--line);margin-bottom:6px}
+  .menu .head .em{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .menu .head .b{font-weight:800;color:var(--ok);font-size:18px}
+  .vipflag{font-size:11px;font-weight:800;color:#fde68a;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.4);padding:2px 8px;border-radius:999px}
+
+  .hero{padding:70px 0 42px;text-align:center}
+  .badge{display:inline-flex;gap:8px;align-items:center;padding:7px 16px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--muted);font-size:13px;font-weight:600;margin-bottom:22px}
+  .hero h1{font-size:clamp(30px,5vw,54px);line-height:1.1;font-weight:900;letter-spacing:-1px}
+  .hero h1 .grad{background:linear-gradient(120deg,var(--accent),var(--brand2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{max-width:640px;margin:18px auto 0;color:var(--muted);font-size:18px}
+  .hero-cta{display:flex;gap:12px;justify-content:center;margin-top:26px;flex-wrap:wrap}
+  .stats{display:flex;gap:36px;justify-content:center;flex-wrap:wrap;margin-top:34px}
+  .stat b{display:block;font-size:26px;font-weight:900}
+  .stat span{color:var(--muted);font-size:13px}
+
+  .section{padding:24px 0 60px}
+  .section-head{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+  .section-head h2{font-size:26px;font-weight:800}
+  .section-head p{color:var(--muted);font-size:14px}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+  .cat-card{background:linear-gradient(180deg,var(--card),var(--bg2));border:1px solid var(--line);border-radius:var(--radius);padding:24px;cursor:pointer;transition:.25s;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+  .cat-card::before{content:"";position:absolute;inset:0;opacity:0;transition:.25s;background:radial-gradient(400px 200px at 50% -20%,var(--cc,var(--brand)),transparent 70%)}
+  .cat-card:hover{transform:translateY(-6px);border-color:rgba(255,255,255,.18)}
+  .cat-card:hover::before{opacity:.22}
+  .cat-icon{width:56px;height:56px;border-radius:15px;display:grid;place-items:center;font-size:28px;background:rgba(255,255,255,.06);border:1px solid var(--line);position:relative}
+  .cat-card h3{margin:16px 0 8px;font-size:19px;font-weight:800;position:relative}
+  .cat-card .desc{color:var(--muted);font-size:14px;position:relative;min-height:44px}
+  .cat-meta{display:flex;align-items:center;justify-content:space-between;margin-top:16px;position:relative}
+  .go{font-weight:800;font-size:14px;display:flex;align-items:center;gap:6px;color:var(--accent)}
+  .cat-badge{position:absolute;top:16px;right:16px;font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid var(--line);color:var(--muted);z-index:2}
+  .cat-badge.owned{color:#04121a;background:linear-gradient(135deg,#10b981,#22d3ee);border-color:transparent}
+  .cat-price{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .price-now{font-size:18px;font-weight:900;color:var(--ok)}
+  .price-old{font-size:13px;color:var(--muted);text-decoration:line-through}
+  .price-free{font-size:15px;font-weight:800;color:var(--ok)}
+  .price-contact{font-size:14px;font-weight:800;color:var(--accent)}
+
+  .lessons-view{display:none}
+  .back{display:inline-flex;align-items:center;gap:8px;color:var(--muted);cursor:pointer;font-weight:700;margin-bottom:18px}
+  .back:hover{color:var(--text)}
+  .cat-hero{display:flex;align-items:center;gap:18px;margin-bottom:8px;flex-wrap:wrap}
+  .cat-hero .cat-icon{width:64px;height:64px;font-size:32px}
+  .cat-hero h2{font-size:30px;font-weight:900}
+  .cat-hero p{color:var(--muted)}
+  .lv-bar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:16px 0;padding:16px 18px;background:var(--card);border:1px solid var(--line);border-radius:14px}
+  .lv-price{display:flex;align-items:baseline;gap:10px}
+  .lv-price .price-now{font-size:24px}
+  .lv-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+  .lock{margin-top:8px;padding:34px;text-align:center;border:1px dashed rgba(255,255,255,.2);border-radius:16px;background:rgba(139,92,246,.06)}
+  .lock .ic{font-size:40px}
+  .lock h3{font-size:19px;margin:8px 0 4px}
+  .lock p{color:var(--muted);font-size:14px;max-width:460px;margin:0 auto 16px}
+
+  .lesson-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;margin-top:22px}
+  .lesson{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;cursor:pointer;transition:.2s}
+  .lesson:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.2)}
+  .thumb{position:relative;aspect-ratio:16/9;background:linear-gradient(135deg,#1a2450,#0f1630);display:grid;place-items:center;overflow:hidden}
+  .thumb img{width:100%;height:100%;object-fit:cover}
+  .thumb .play{position:absolute;width:54px;height:54px;border-radius:50%;background:rgba(0,0,0,.55);display:grid;place-items:center;border:2px solid #fff;backdrop-filter:blur(4px)}
+  .thumb .lockic{position:absolute;width:54px;height:54px;border-radius:50%;background:rgba(0,0,0,.6);display:grid;place-items:center;font-size:22px}
+  .thumb .dur{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.75);padding:3px 8px;border-radius:6px;font-size:12px;font-weight:700}
+  .thumb .free{position:absolute;top:8px;left:8px;background:var(--ok);color:#04121a;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:800;text-transform:uppercase}
+  .lesson .body{padding:14px 16px}
+  .lesson .body h4{font-size:15px;font-weight:800;line-height:1.35}
+  .lesson .body p{color:var(--muted);font-size:13px;margin-top:6px}
+
+  .drive-embed{margin-top:14px}
+  .drive-embed-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+  .drive-embed-head span{font-size:18px;font-weight:800}
+  .drive-embed iframe{width:100%;height:640px;border:1px solid var(--line);border-radius:16px;background:#fff}
+  .drive-embed-note{color:var(--muted);font-size:13px;margin-top:10px}
+
+  .empty{text-align:center;padding:50px 20px;color:var(--muted)}
+  .empty .big{font-size:44px;margin-bottom:12px}
+
+  /* MODALS */
+  .modal{position:fixed;inset:0;z-index:100;background:rgba(4,7,18,.85);backdrop-filter:blur(6px);display:none;align-items:flex-start;justify-content:center;padding:26px 16px;overflow:auto}
+  .modal.open{display:flex}
+  .modal-inner{width:min(960px,100%);background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin:auto}
+  .modal-video{aspect-ratio:16/9;background:#000}
+  .modal-video iframe,.modal-video video{width:100%;height:100%;border:0;display:block}
+  .modal-info{padding:18px 22px;display:flex;justify-content:space-between;gap:14px;align-items:start}
+  .modal-info h3{font-size:19px;font-weight:800}
+  .modal-info p{color:var(--muted);font-size:14px;margin-top:6px}
+  .close{cursor:pointer;background:var(--card2);border:1px solid var(--line);width:38px;height:38px;border-radius:10px;font-size:18px;color:var(--text);flex:none}
+  .pcard{width:min(460px,100%);background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px;margin:auto}
+  .pcard.wide{width:min(600px,100%)}
+  .pcard h3{font-size:20px}
+  .phead{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+  .tabs2{display:flex;gap:8px;background:var(--bg2);padding:5px;border-radius:12px;margin-bottom:18px}
+  .tabs2 button{flex:1;padding:9px;border:0;border-radius:9px;background:transparent;color:var(--muted);font-weight:700;cursor:pointer}
+  .tabs2 button.on{background:var(--card);color:var(--text)}
+  .msg{font-size:13px;margin-top:10px;min-height:18px}
+  .msg.err{color:#fca5a5}.msg.ok{color:#86efac}
+  .hint{font-size:12px;color:var(--muted);margin-top:6px}
+  .quick{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+  .quick button{background:var(--bg2);border:1px solid var(--line);color:var(--text);border-radius:9px;padding:8px 12px;font-weight:700;cursor:pointer;font-size:13px}
+  .quick button:hover{border-color:var(--brand)}
+  .qr-box{text-align:center;padding:14px;background:#fff;border-radius:14px;margin:12px 0}
+  .qr-box img{width:230px;max-width:100%}
+  .kv{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .kv b{font-weight:800}
+  .code-pill{font-family:monospace;font-weight:800;background:var(--bg2);border:1px dashed var(--brand);padding:8px 12px;border-radius:9px;display:inline-block;letter-spacing:1px}
+  .vip-card{border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:12px;background:var(--bg2)}
+  .vip-card.best{border-color:var(--brand);box-shadow:0 0 0 2px rgba(99,102,241,.25)}
+  .vip-card h4{font-size:17px}
+  .vip-card .p{font-size:22px;font-weight:900;color:var(--ok);margin:4px 0}
+  .txrow{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .txrow .a.plus{color:var(--ok);font-weight:800}
+  .txrow .a.minus{color:#fca5a5;font-weight:800}
+
+  .notice{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);color:#fcd34d;padding:12px 16px;border-radius:12px;font-size:14px;margin:18px 0}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--card2);border:1px solid var(--line);padding:12px 20px;border-radius:12px;font-weight:700;font-size:14px;z-index:200;display:none;box-shadow:0 12px 30px -10px #000;max-width:90vw;text-align:center}
+  .toast.show{display:block}
+  .toast.ok{border-color:rgba(52,211,153,.5)}.toast.err{border-color:rgba(239,68,68,.5)}
+  footer{border-top:1px solid var(--line);padding:30px 0;color:var(--muted);font-size:14px;text-align:center;margin-top:40px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="#" onclick="showHome();return false"><span class="mark">🎓</span><span id="siteName">Học Viện Marketing</span></a>
+    <div class="nav-actions" id="accountArea"></div>
+  </div>
+</header>
+<div class="menu" id="userMenu"></div>
+
+<!-- HOME -->
+<main id="homeView">
+  <section class="hero wrap">
+    <div class="badge">✨ Học mọi lúc — thanh toán linh hoạt bằng ví</div>
+    <h1>Làm chủ <span class="grad">Marketing thực chiến</span></h1>
+    <p id="tagline">Đăng ký tài khoản, nạp ví và mở khoá học chỉ trong vài phút.</p>
+    <div class="hero-cta" id="heroCta"></div>
+    <div class="stats">
+      <div class="stat"><b id="statCat">—</b><span>Khoá học</span></div>
+      <div class="stat"><b id="statLes">—</b><span>Tổng bài học</span></div>
+      <div class="stat"><b>VIP</b><span>Mở tất cả</span></div>
+    </div>
+  </section>
+  <section class="section wrap" id="khoa-hoc">
+    <div class="section-head"><div><h2>Danh mục khoá học</h2><p>Chọn khoá để xem chi tiết — có bài học miễn phí xem thử.</p></div></div>
+    <div id="catNotice"></div>
+    <div id="catGrid" class="grid"><div class="empty">Đang tải…</div></div>
+  </section>
+</main>
+
+<!-- CATEGORY -->
+<main id="lessonsView" class="lessons-view">
+  <section class="section wrap">
+    <div class="back" onclick="showHome()">← Quay lại tất cả khoá học</div>
+    <div class="cat-hero"><div class="cat-icon" id="lvIcon">📚</div><div><h2 id="lvName">—</h2><p id="lvDesc"></p></div></div>
+    <div class="lv-bar" id="lvBar"></div>
+    <div id="lvContent"></div>
+    <div id="lessonGrid" class="lesson-grid"></div>
+    <div id="driveEmbed"></div>
+  </section>
+</main>
+
+<!-- VIDEO MODAL -->
+<div class="modal" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-inner">
+    <div class="modal-video" id="modalVideo"></div>
+    <div class="modal-info"><div><h3 id="modalTitle"></h3><p id="modalDesc"></p></div><button class="close" onclick="closeModal()">✕</button></div>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="modal" id="authModal" onclick="if(event.target===this)closeM('authModal')">
+  <div class="pcard">
+    <div class="phead"><h3 id="authTitle">Đăng nhập</h3><button class="close" onclick="closeM('authModal')">✕</button></div>
+    <div class="tabs2"><button id="tabLogin" class="on" onclick="authMode('login')">Đăng nhập</button><button id="tabReg" onclick="authMode('register')">Đăng ký</button></div>
+    <div class="field" id="nameField" style="display:none"><label>Họ tên</label><input id="auName" placeholder="Nguyễn Văn A"></div>
+    <div class="field"><label>Email</label><input id="auEmail" type="email" placeholder="ban@email.com"></div>
+    <div class="field"><label>Mật khẩu</label><input id="auPass" type="password" placeholder="••••••••"></div>
+    <button class="btn btn-primary btn-block btn-lg" id="auBtn" onclick="submitAuth()">Đăng nhập</button>
+    <div class="msg" id="auMsg"></div>
+  </div>
+</div>
+
+<!-- WALLET MODAL -->
+<div class="modal" id="walletModal" onclick="if(event.target===this)closeM('walletModal')">
+  <div class="pcard wide">
+    <div class="phead"><h3>💰 Ví của tôi</h3><button class="close" onclick="closeM('walletModal')">✕</button></div>
+    <div id="walletBody"></div>
+  </div>
+</div>
+
+<!-- VIP MODAL -->
+<div class="modal" id="vipModal" onclick="if(event.target===this)closeM('vipModal')">
+  <div class="pcard wide">
+    <div class="phead"><h3>👑 Gói VIP — Mở tất cả khoá</h3><button class="close" onclick="closeM('vipModal')">✕</button></div>
+    <div id="vipBody"></div>
+  </div>
+</div>
+
+<!-- MY COURSES MODAL -->
+<div class="modal" id="myModal" onclick="if(event.target===this)closeM('myModal')">
+  <div class="pcard wide">
+    <div class="phead"><h3>📚 Khoá học của tôi</h3><button class="close" onclick="closeM('myModal')">✕</button></div>
+    <div id="myBody"></div>
+  </div>
+</div>
+
+<footer class="wrap">© <span id="year"></span> <span id="footName">Học Viện Marketing</span> · Nền tảng học phí xây bằng web tĩnh + Supabase</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const cfg = window.APP_CONFIG || {};
+document.getElementById('year').textContent = new Date().getFullYear();
+if(cfg.SITE_NAME){siteName.textContent=cfg.SITE_NAME;footName.textContent=cfg.SITE_NAME;document.title=cfg.SITE_NAME;}
+if(cfg.SITE_TAGLINE) tagline.textContent=cfg.SITE_TAGLINE;
+const configured = cfg.SUPABASE_URL && cfg.SUPABASE_URL.startsWith('http') && cfg.SUPABASE_ANON_KEY && cfg.SUPABASE_ANON_KEY.length>20;
+let sb=null; if(configured) sb=supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
+
+let USER=null, PROFILE=null, ENROLLED=new Set(), CATS=[], CURRENT=null;
+
+/* ---------- DEMO DATA (khi chưa cấu hình Supabase) ---------- */
+const DEMO_CATS = [
+  {id:'c1',name:"MEME SOUND",slug:"meme-sound",description:'',icon:"🔊",color:'#f97316',drive_url:'https://drive.google.com/drive/folders/1riKUP3kG9MzXNpzA5kA3E9YTyk1YhQTx',course_count:null,price:500000,original_price:null},
+  {id:'c2',name:"AFFILIATE",slug:"affiliate",description:'',icon:"💰",color:'#f59e0b',drive_url:'https://drive.google.com/drive/folders/1BdVdwJcb2m7HlCFSj1StR1d7SBCtsY-w',course_count:5,price:null,original_price:null},
+  {id:'c3',name:"AMAZON - EBAY - DROPSHIP",slug:"amazon-ebay-dropship",description:'',icon:"📦",color:'#ff9900',drive_url:'https://drive.google.com/drive/folders/1KCxHPjJBsHKnbYDo-uXtcWO0YC-ey05J',course_count:10,price:null,original_price:null},
+  {id:'c4',name:"CANVA - CAPCUT",slug:"canva-capcut",description:'',icon:"🎨",color:'#8b5cf6',drive_url:'https://drive.google.com/drive/folders/1KB_A77vHI42K16hg109sQPvAaYHyEwcZ',course_count:6,price:null,original_price:null},
+  {id:'c5',name:"CHAT GPT",slug:"chat-gpt",description:'',icon:"🤖",color:'#10a37f',drive_url:'https://drive.google.com/drive/folders/13wXnoBRVrVJJd3EnHz94Sv9GMKz09Gvf',course_count:15,price:null,original_price:null},
+  {id:'c6',name:"CHAT BOT",slug:"chat-bot",description:'',icon:"💬",color:'#06b6d4',drive_url:'https://drive.google.com/drive/folders/1S31g0kbGyBI5kBzolEZcYk9X0FyLP05j',course_count:2,price:null,original_price:null},
+  {id:'c7',name:"CHỨNG KHOÁN",slug:"chung-khoan",description:'',icon:"📈",color:'#16a34a',drive_url:'https://drive.google.com/drive/folders/1heI1EshDcy77RbRrdKKmDnZAcGJiDspH',course_count:9,price:null,original_price:null},
+  {id:'c8',name:"CONTENT",slug:"content",description:'',icon:"✍️",color:'#ec4899',drive_url:'https://drive.google.com/drive/folders/1yAcHDB1c2n5dc98NKhLANP08zTFoIFBi',course_count:7,price:null,original_price:null},
+  {id:'c9',name:"DROPSHIP LINH THẠCH MỚI NHẤT",slug:"dropship-linh-thach-moi-nhat",description:'',icon:"🛒",color:'#0ea5e9',drive_url:'https://drive.google.com/drive/folders/1p9psQ4qb_MwCXVyzud83ODtediR9zlKU',course_count:null,price:25000000,original_price:null},
+  {id:'c10',name:"FACEBOOK",slug:"facebook",description:'',icon:"📘",color:'#1877f2',drive_url:'https://drive.google.com/drive/folders/10vQ-N4ViZp3uHDQJygjTgaOYnCsWIl6c',course_count:36,price:null,original_price:null},
+  {id:'c11',name:"TÌM NGUỒN HÀNG",slug:"tim-nguon-hang",description:'',icon:"🔍",color:'#14b8a6',drive_url:'https://drive.google.com/drive/folders/1igjZYrESkAUNtkT8jl67JaXtYH6mH1F7',course_count:12,price:null,original_price:null},
+  {id:'c12',name:"GOOGLE",slug:"google",description:'',icon:"🌐",color:'#ea4335',drive_url:'https://drive.google.com/drive/folders/1CfLLmnKNuskdE1CKqM0ADswwRxCjeEX0',course_count:8,price:null,original_price:null},
+  {id:'c13',name:"HẠ GỤC KHÁCH HÀNG",slug:"ha-guc-khach-hang",description:'',icon:"🎯",color:'#ef4444',drive_url:'https://drive.google.com/drive/folders/1ciKdQP9gyo_NSb7TUyWbERtpn96_hXa4',course_count:3,price:null,original_price:null},
+  {id:'c14',name:"ĐỈNH CAO CHỐT SALE",slug:"dinh-cao-chot-sale",description:'',icon:"🤝",color:'#e11d48',drive_url:'https://drive.google.com/drive/folders/1F9Q89xFiqu62D363Ynjeb5QLaWg-vUka',course_count:null,price:1000000,original_price:null},
+  {id:'c15',name:"LÀM VIDEO BÁN HÀNG",slug:"lam-video-ban-hang",description:'',icon:"🎬",color:'#f43f5e',drive_url:'https://drive.google.com/drive/folders/1XVKDElEUendGprQTtixJAilfIQ6mBsUT',course_count:null,price:500000,original_price:null},
+  {id:'c16',name:"LIVESTREAM BÁN HÀNG ONLINE",slug:"livestream-ban-hang-online",description:'',icon:"📹",color:'#ef4444',drive_url:'https://drive.google.com/drive/folders/1jdaZfx9A71mmmmPQ5PrScNWZeOcniXYv',course_count:null,price:10000000,original_price:null},
+  {id:'c17',name:"KIẾM TIỀN YOUTUBE",slug:"kiem-tien-youtube",description:'',icon:"▶️",color:'#ff0000',drive_url:'https://drive.google.com/drive/folders/15_yeVrA7azrftHyxUyR2AAq9JovaYnfi',course_count:10,price:null,original_price:null},
+  {id:'c18',name:"KINH DOANH",slug:"kinh-doanh",description:'',icon:"💼",color:'#6366f1',drive_url:'https://drive.google.com/drive/folders/1Ls41NbYOsfxCURbKdiqEuNuqVT8kuF6C',course_count:null,price:20000000,original_price:null},
+  {id:'c19',name:"LAZADA FULL",slug:"lazada-full",description:'',icon:"🛍️",color:'#0f146e',drive_url:'https://drive.google.com/drive/folders/1IdagTa2Ax9j0nLc_wrVixLdOt13VN1Sw',course_count:null,price:4000000,original_price:null},
+  {id:'c20',name:"MINH XIN CHÀO",slug:"minh-xin-chao",description:'',icon:"👋",color:'#0d9488',drive_url:'https://drive.google.com/drive/folders/1TXbziTYvDY7ykp8b9bCCh3-5z56MJw9V',course_count:null,price:10000000,original_price:null},
+  {id:'c21',name:"NHẬP HÀNG TRUNG QUỐC (3 Phần)",slug:"nhap-hang-trung-quoc-3-phan",description:'',icon:"🏭",color:'#dc2626',drive_url:'https://drive.google.com/drive/folders/1j8hEIV9pp9zokfZ_4qtPprZiTAnf2BfQ',course_count:null,price:null,original_price:null},
+  {id:'c22',name:"PHOTOSHOP - EDIT VIDEO",slug:"photoshop-edit-video",description:'',icon:"🖼️",color:'#2563eb',drive_url:'https://drive.google.com/drive/folders/1BY2HjB2Um-a35R24HpMiW8JdVi3kFv0_',course_count:7,price:null,original_price:null},
+  {id:'c23',name:"HIGH LEVEL RAINMAKER",slug:"high-level-rainmaker",description:'',icon:"💎",color:'#a855f7',drive_url:'https://drive.google.com/drive/folders/1S5tt1ZT1mRoJOi-ugS79V4GM7eFaGd8A',course_count:null,price:null,original_price:null},
+  {id:'c24',name:"SEO WEBSITE",slug:"seo-website",description:'',icon:"🔧",color:'#22c55e',drive_url:'https://drive.google.com/drive/folders/1wOuvUZWb_fL3eVsGvUmXhIj2MGOtH8TR',course_count:15,price:null,original_price:null},
+  {id:'c25',name:"SHOPEE",slug:"shopee",description:'',icon:"🧡",color:'#ee4d2d',drive_url:'https://drive.google.com/drive/folders/1BoBH70OQdTXzy5quf5A710i8STExvXQ4',course_count:15,price:null,original_price:null},
+  {id:'c26',name:"TIKTOK",slug:"tiktok",description:'',icon:"🎵",color:'#111827',drive_url:'https://drive.google.com/drive/folders/1cEqe6TTpAKGk2FksZu1uXfWWhKLVigYe',course_count:35,price:null,original_price:null},
+  {id:'c27',name:"ZALO ADS",slug:"zalo-ads",description:'',icon:"📣",color:'#0068ff',drive_url:'https://drive.google.com/drive/folders/1J7RSJhhh4_DcBE_rEsKXV9ENxyHyS0Vw',course_count:null,price:5000000,original_price:null},
+  {id:'c28',name:"CHU MINH HẠNH",slug:"chu-minh-hanh",description:'',icon:"👤",color:'#7c3aed',drive_url:'https://drive.google.com/drive/folders/1bz13thUUaQiuXaafZh5V718yt4kieAlf',course_count:6,price:null,original_price:null},
+  {id:'c29',name:"LẬP TRÌNH",slug:"lap-trinh",description:'',icon:"💻",color:'#334155',drive_url:'https://drive.google.com/drive/folders/1eAG9Vg86Vi4AfeeF-BX0wwmRhkSHxYsA',course_count:null,price:null,original_price:null},
+  {id:'c30',name:"NGÔ MINH TUẤN",slug:"ngo-minh-tuan",description:'',icon:"🧑‍🏫",color:'#0891b2',drive_url:'https://drive.google.com/drive/folders/1r77kp8WGZwqpAA0PFN8t9ENfZApK8ZuX',course_count:5,price:null,original_price:null},
+  {id:'c31',name:"Excel",slug:"excel",description:'',icon:"📊",color:'#217346',drive_url:'https://drive.google.com/drive/folders/1xK28cx0jbmSEFFoHv_dk4O_C9C5pheru',course_count:null,price:null,original_price:null},
+  {id:'c32',name:"NGOẠI NGỮ",slug:"ngoai-ngu",description:'',icon:"🗣️",color:'#f59e0b',drive_url:'https://drive.google.com/drive/folders/1m3HW9PjPssyrWCOvXIb3qUc1QDqP-yiQ',course_count:4,price:null,original_price:null},
+  {id:'c33',name:"EMAIL MARKETING",slug:"email-marketing",description:'',icon:"📧",color:'#3b82f6',drive_url:'https://drive.google.com/drive/folders/16ZIXbUc1AsVqXSQ4PzA_KNE80zJ_A6lC',course_count:5,price:null,original_price:null},
+  {id:'c34',name:"SINH TRẮC VÂN TAY",slug:"sinh-trac-van-tay",description:'',icon:"🖐️",color:'#9333ea',drive_url:'https://drive.google.com/drive/folders/1Yo3p8xusaNIScMH-h4zgDWtRyCD5xxiu',course_count:null,price:null,original_price:null},
+  {id:'c35',name:"Instagram",slug:"instagram",description:'',icon:"📸",color:'#e1306c',drive_url:'https://drive.google.com/drive/folders/1Dl7hK0mgv0gKggoshMmrvWHTGfUhTiyE',course_count:null,price:null,original_price:null},
+  {id:'c36',name:"SENDO",slug:"sendo",description:'',icon:"🏬",color:'#e60012',drive_url:'https://drive.google.com/drive/folders/1Ry_-SoStsLDFk5v13grHCvX3hDr215K_',course_count:null,price:null,original_price:null},
+  {id:'c37',name:"Update mới",slug:"update-moi",description:'',icon:"🆕",color:'#8b5cf6',drive_url:'https://drive.google.com/drive/folders/1W7owO00ovvua45DEtzVthxpQ0T-AmyEX',course_count:null,price:null,original_price:null}
+];
+
+/* ---------- HELPERS ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function fmtVND(n){return Number(n||0).toLocaleString('vi-VN')+'đ'}
+function priceHtml(c){
+  if(c.price===0) return '<span class="price-free">Miễn phí</span>';
+  if(c.price>0){let o=(c.original_price&&c.original_price>c.price)?`<span class="price-old">${fmtVND(c.original_price)}</span>`:'';return `${o}<span class="price-now">${fmtVND(c.price)}</span>`;}
+  return '<span class="price-contact">Liên hệ</span>';
+}
+function vipActive(){return PROFILE&&PROFILE.vip_until&&new Date(PROFILE.vip_until)>new Date();}
+function hasAccess(c){return !!(USER&&(vipActive()||ENROLLED.has(c.id)||c.price===0));}
+function driveFolderId(u){if(!u)return null;const m=u.match(/\/folders\/([\w-]+)/)||u.match(/[?&]id=([\w-]+)/);return m?m[1]:null;}
+function toast(t,type){const el=document.getElementById('toast');el.textContent=t;el.className='toast show '+(type||'');clearTimeout(window._tt);window._tt=setTimeout(()=>el.className='toast',3000);}
+function toEmbed(url){if(!url)return null;let m;
+  if((m=url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([\w-]{11})/)))return{type:'iframe',src:`https://www.youtube.com/embed/${m[1]}?autoplay=1&rel=0`};
+  if((m=url.match(/vimeo\.com\/(\d+)/)))return{type:'iframe',src:`https://player.vimeo.com/video/${m[1]}?autoplay=1`};
+  if((m=url.match(/drive\.google\.com\/file\/d\/([\w-]+)/)))return{type:'iframe',src:`https://drive.google.com/file/d/${m[1]}/preview`};
+  if(/\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(url))return{type:'video',src:url};
+  return{type:'iframe',src:url};}
+
+/* ---------- INIT ---------- */
+async function init(){
+  if(configured){
+    const {data:{session}} = await sb.auth.getSession();
+    if(session){ USER=session.user; await loadProfile(); await loadEnrollments(); }
+    sb.auth.onAuthStateChange((_e,s)=>{ /* giữ đồng bộ khi refresh token */ });
+  }
+  renderAccount();
+  await loadCategories();
+}
+async function loadProfile(){ if(!USER)return; const {data}=await sb.from('profiles').select('*').eq('id',USER.id).maybeSingle(); PROFILE=data||{balance:0}; }
+async function loadEnrollments(){ if(!USER){ENROLLED=new Set();return;} const {data}=await sb.from('enrollments').select('category_id').eq('user_id',USER.id); ENROLLED=new Set((data||[]).map(x=>x.category_id)); }
+
+/* ---------- ACCOUNT UI ---------- */
+function renderAccount(){
+  const area=document.getElementById('accountArea');
+  const cta=document.getElementById('heroCta');
+  if(USER){
+    const initial=(USER.email||'?')[0].toUpperCase();
+    const vip=vipActive()?`<span class="vipflag">VIP</span>`:'';
+    area.innerHTML=`<a class="btn btn-ghost" href="admin.html">Quản trị</a>
+      <div class="chip" onclick="toggleMenu(event)"><span class="bal">${fmtVND(PROFILE?.balance)}</span> ${vip} <span class="av">${initial}</span></div>`;
+    cta.innerHTML=`<button class="btn btn-ok btn-lg" onclick="openWallet()">💰 Nạp tiền</button><button class="btn btn-ghost btn-lg" onclick="openVip()">👑 Xem gói VIP</button>`;
+  }else{
+    area.innerHTML=`<button class="btn btn-ghost" onclick="openAuth('login')">Đăng nhập</button><button class="btn btn-primary" onclick="openAuth('register')">Đăng ký học</button>`;
+    cta.innerHTML=`<button class="btn btn-primary btn-lg" onclick="openAuth('register')">🚀 Đăng ký học ngay</button><button class="btn btn-ghost btn-lg" onclick="openVip()">👑 Xem gói VIP</button>`;
+  }
+}
+function toggleMenu(e){e.stopPropagation();const m=document.getElementById('userMenu');
+  m.innerHTML=`<div class="head"><div class="em">${esc(USER.email)}</div><div class="b">${fmtVND(PROFILE?.balance)}</div>${vipActive()?`<div class="hint">VIP đến ${new Date(PROFILE.vip_until).toLocaleDateString('vi-VN')}</div>`:''}</div>
+    <div class="mi" onclick="closeMenu();openWallet()">💰 Ví & nạp tiền</div>
+    <div class="mi" onclick="closeMenu();openMyCourses()">📚 Khoá học của tôi</div>
+    <div class="mi" onclick="closeMenu();openVip()">👑 Nâng cấp VIP</div>
+    <div class="mi" onclick="closeMenu();logout()">🚪 Đăng xuất</div>`;
+  m.classList.toggle('open');
+}
+function closeMenu(){document.getElementById('userMenu').classList.remove('open');}
+document.addEventListener('click',()=>closeMenu());
+
+/* ---------- CATEGORIES ---------- */
+async function loadCategories(){
+  const grid=document.getElementById('catGrid'), notice=document.getElementById('catNotice');
+  if(!configured){
+    notice.innerHTML='<div class="notice">⚠️ Chế độ DEMO (chưa cấu hình Supabase). Đăng ký/nạp tiền chưa hoạt động. Xem <b>HUONG-DAN.md</b>.</div>';
+    CATS=DEMO_CATS; renderCategories({}); return;
+  }
+  try{
+    const {data:cats,error}=await sb.from('catalog').select('*').order('sort_order');
+    if(error) throw error;
+    const {data:les}=await sb.from('lessons_catalog').select('category_id');
+    const counts={}; (les||[]).forEach(l=>counts[l.category_id]=(counts[l.category_id]||0)+1);
+    CATS=cats||[]; renderCategories(counts);
+  }catch(e){ grid.innerHTML='<div class="notice">Không tải được dữ liệu: '+e.message+'. Kiểm tra config.js và đã chạy file SQL chưa.</div>'; }
+}
+function renderCategories(counts){
+  const grid=document.getElementById('catGrid');
+  if(!CATS.length){grid.innerHTML='<div class="empty"><div class="big">📭</div>Chưa có khoá học.</div>';return;}
+  const totalCourses=CATS.reduce((s,c)=>s+(c.course_count||0),0);
+  const totalLessons=Object.values(counts).reduce((a,b)=>a+b,0);
+  document.getElementById('statCat').textContent=CATS.length;
+  document.getElementById('statLes').textContent=(totalCourses||totalLessons||CATS.length);
+  grid.innerHTML=CATS.map(c=>{
+    const owned=hasAccess(c);
+    const badge=owned?`<span class="cat-badge owned">✓ Đã sở hữu</span>`:(c.course_count?`<span class="cat-badge">${c.course_count} khoá</span>`:'');
+    const desc=esc(c.description||'')||'Bấm để xem chi tiết & học thử.';
+    return `<div class="cat-card" style="--cc:${c.color||'#6366f1'}" onclick="openCategory('${c.id}')">
+      ${badge}
+      <div class="cat-icon">${c.icon||'📚'}</div>
+      <h3>${esc(c.name)}</h3>
+      <div class="desc">${desc}</div>
+      <div class="cat-meta"><div class="cat-price">${owned?'<span class="price-free">Đã mở khoá</span>':priceHtml(c)}</div><span class="go">Xem →</span></div>
+    </div>`;
+  }).join('');
+}
+
+/* ---------- CATEGORY PAGE ---------- */
+async function openCategory(id){
+  const c=CATS.find(x=>x.id===id); if(!c)return; CURRENT=c;
+  homeView.style.display='none'; lessonsView.style.display='block';
+  lvIcon.textContent=c.icon||'📚'; lvName.textContent=c.name; lvDesc.textContent=c.description||'';
+  window.scrollTo({top:0,behavior:'smooth'});
+  const access=hasAccess(c);
+  // Thanh giá + hành động
+  const bar=document.getElementById('lvBar');
+  let actions='';
+  if(access){ actions=`<span class="price-free" style="font-size:16px">✓ Bạn đã sở hữu khoá này</span>`; }
+  else if(!USER){ actions=`<button class="btn btn-primary" onclick="openAuth('login')">Đăng nhập để mua</button><button class="btn btn-ghost" onclick="openVip()">Xem gói VIP</button>`; }
+  else if(c.price>0){ actions=`<button class="btn btn-ok btn-lg" onclick="buyCourse('${c.id}')">Mua khoá này · ${fmtVND(c.price)}</button><button class="btn btn-ghost" onclick="openVip()">Hoặc mua VIP</button>`; }
+  else if(c.price===0){ actions=`<button class="btn btn-ok" onclick="buyCourse('${c.id}')">Mở khoá miễn phí</button>`; }
+  else { actions=`<button class="btn btn-ghost" onclick="openVip()">Liên hệ / Xem gói VIP</button>`; }
+  bar.innerHTML=`<div class="lv-price">${access?'<span class="price-free">Đã mở khoá</span>':priceHtml(c)}</div><div class="lv-actions">${actions}</div>`;
+
+  const content=document.getElementById('lvContent');
+  const grid=document.getElementById('lessonGrid');
+  const embed=document.getElementById('driveEmbed');
+  content.innerHTML=''; grid.innerHTML=''; embed.innerHTML='';
+
+  // Lấy bài giảng lẻ (nếu có)
+  let lessons=[];
+  if(configured){ const {data}=await sb.from('lessons_catalog').select('*').eq('category_id',id).order('sort_order'); lessons=data||[]; }
+
+  // Danh sách bài giảng (miễn phí xem thử; còn lại khoá nếu chưa mua)
+  if(lessons.length){
+    grid.innerHTML='<h3 style="margin:6px 0 2px;font-size:18px">🎬 Bài giảng</h3>'+lessons.map(l=>{
+      const canPlay=l.is_free||access;
+      return `<div class="lesson" onclick="playLesson('${l.id}',${canPlay})">
+        <div class="thumb">
+          ${l.thumbnail_url?`<img src="${esc(l.thumbnail_url)}">`:''}
+          ${l.is_free?'<span class="free">Xem thử</span>':''}
+          ${canPlay?'<div class="play"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div>':'<div class="lockic">🔒</div>'}
+          ${l.duration?`<span class="dur">${esc(l.duration)}</span>`:''}
+        </div>
+        <div class="body"><h4>${esc(l.title)}</h4>${l.description?`<p>${esc(l.description)}</p>`:''}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Khu vực nội dung chính (thư mục Drive) — chỉ hiện khi có quyền
+  const hasDrive = c.has_drive || !!c.drive_url;
+  if(!hasDrive){ if(!lessons.length) content.innerHTML='<div class="empty"><div class="big">🎬</div>Khoá này chưa có nội dung.</div>'; return; }
+
+  if(!configured){ // demo: hiện luôn để xem thử giao diện
+    embed.innerHTML=driveEmbedHtml(c.drive_url); return;
+  }
+  if(access){
+    // Lấy link Drive qua RPC (server chỉ trả khi đã mua)
+    const {data:url}=await sb.rpc('get_drive_url',{cat:id});
+    embed.innerHTML=url?driveEmbedHtml(url):'<div class="notice">Không lấy được nội dung. Thử tải lại trang.</div>';
+  }else{
+    content.innerHTML=`<div class="lock"><div class="ic">🔒</div>
+      <h3>Nội dung khoá học đã được khoá</h3>
+      <p>Mua khoá này hoặc nâng cấp VIP để mở toàn bộ video bài học. ${lessons.some(l=>l.is_free)?'Bạn vẫn có thể xem các bài “Xem thử” ở trên.':''}</p>
+      <div class="lv-actions" style="justify-content:center">
+        ${c.price>0?`<button class="btn btn-ok btn-lg" onclick="buyCourse('${c.id}')">Mua khoá · ${fmtVND(c.price)}</button>`:''}
+        <button class="btn btn-primary btn-lg" onclick="openVip()">👑 Nâng cấp VIP</button>
+      </div></div>`;
+  }
+}
+function driveEmbedHtml(url){
+  const id=driveFolderId(url); if(!id)return '';
+  return `<div class="drive-embed"><div class="drive-embed-head"><span>🎬 Video trong khoá học</span>
+    <a class="btn btn-ghost" href="${esc(url)}" target="_blank" rel="noopener">Mở trong Drive ↗</a></div>
+    <iframe src="https://drive.google.com/embeddedfolderview?id=${id}#grid" loading="lazy"></iframe>
+    <p class="drive-embed-note">Bấm vào video bất kỳ để xem. Nếu khung trống, thư mục Drive chưa được đặt quyền “Bất kỳ ai có đường liên kết”.</p></div>`;
+}
+function showHome(){lessonsView.style.display='none';homeView.style.display='block';window.scrollTo({top:0,behavior:'smooth'});}
+
+/* ---------- PLAY VIDEO ---------- */
+async function playLesson(lessonId,canPlay){
+  if(!canPlay){ toast('🔒 Cần mua khoá để xem bài này','err'); return; }
+  let url=null;
+  if(configured){ const {data}=await sb.rpc('get_video',{lesson:lessonId}); url=data; }
+  if(!url){ toast('Không mở được video (cần mua khoá)','err'); return; }
+  const e=toEmbed(url); const box=document.getElementById('modalVideo');
+  box.innerHTML = e.type==='video'?`<video src="${e.src}" controls autoplay playsinline></video>`:`<iframe src="${e.src}" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');document.getElementById('modalVideo').innerHTML='';}
+
+/* ---------- AUTH ---------- */
+let authCur='login';
+function openAuth(mode){ if(!configured){toast('Hãy cấu hình Supabase trong config.js trước','err');return;} authMode(mode||'login'); document.getElementById('auMsg').textContent=''; openM('authModal'); }
+function authMode(m){authCur=m;
+  tabLogin.classList.toggle('on',m==='login'); tabReg.classList.toggle('on',m==='register');
+  authTitle.textContent=m==='login'?'Đăng nhập':'Đăng ký tài khoản';
+  nameField.style.display=m==='register'?'block':'none';
+  auBtn.textContent=m==='login'?'Đăng nhập':'Tạo tài khoản';
+}
+async function submitAuth(){
+  const email=auEmail.value.trim(), pass=auPass.value, msg=document.getElementById('auMsg'); msg.className='msg';
+  if(!email||!pass){msg.className='msg err';msg.textContent='Nhập email và mật khẩu.';return;}
+  auBtn.disabled=true; auBtn.textContent='Đang xử lý…';
+  try{
+    if(authCur==='register'){
+      const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{full_name:auName.value.trim()}}});
+      if(error) throw error;
+      if(!data.session){ msg.className='msg ok'; msg.textContent='✅ Đã tạo tài khoản! Kiểm tra email để xác nhận rồi đăng nhập.'; auBtn.disabled=false; auBtn.textContent='Tạo tài khoản'; return; }
+      USER=data.user;
+    }else{
+      const {data,error}=await sb.auth.signInWithPassword({email,password:pass});
+      if(error) throw error; USER=data.user;
+    }
+    await loadProfile(); await loadEnrollments(); renderAccount();
+    closeM('authModal'); toast('Xin chào '+ (USER.email) +' 👋','ok');
+    await loadCategories(); if(CURRENT) openCategory(CURRENT.id);
+  }catch(e){ msg.className='msg err'; msg.textContent='✕ '+viErr(e.message); }
+  auBtn.disabled=false; auBtn.textContent=authCur==='login'?'Đăng nhập':'Tạo tài khoản';
+}
+function viErr(m){if(/Invalid login/i.test(m))return'Sai email hoặc mật khẩu.';if(/already registered/i.test(m))return'Email đã được đăng ký.';if(/at least 6/i.test(m))return'Mật khẩu tối thiểu 6 ký tự.';return m;}
+async function logout(){ await sb.auth.signOut(); USER=null;PROFILE=null;ENROLLED=new Set(); renderAccount(); await loadCategories(); showHome(); toast('Đã đăng xuất'); }
+
+/* ---------- BUY ---------- */
+async function buyCourse(id){
+  if(!USER){openAuth('login');return;}
+  const c=CATS.find(x=>x.id===id);
+  if(c.price>0 && !confirm(`Mua khoá "${c.name}" với giá ${fmtVND(c.price)}?\nSố dư sẽ bị trừ tương ứng.`)) return;
+  const {data,error}=await sb.rpc('purchase_course',{cat:id});
+  if(error){toast('Lỗi: '+error.message,'err');return;}
+  if(!data.ok){ toast(data.message,'err'); if(data.need){openWallet();} return; }
+  await loadProfile(); await loadEnrollments(); renderAccount();
+  toast('🎉 '+data.message,'ok'); openCategory(id); loadCategories();
+}
+
+/* ---------- WALLET ---------- */
+async function openWallet(){ if(!USER){openAuth('login');return;} openM('walletModal'); await renderWallet(); }
+async function renderWallet(){
+  const b=document.getElementById('walletBody');
+  b.innerHTML='<div class="empty">Đang tải…</div>';
+  await loadProfile();
+  const {data:txs}=await sb.from('wallet_tx').select('*').eq('user_id',USER.id).order('created_at',{ascending:false}).limit(20);
+  const txHtml=(txs&&txs.length)?txs.map(t=>`<div class="txrow"><div>${txLabel(t.type)}<div class="hint">${esc(t.note||'')} · ${new Date(t.created_at).toLocaleString('vi-VN')}</div></div><div class="a ${t.amount>=0?'plus':'minus'}">${t.amount>=0?'+':''}${fmtVND(t.amount)}</div></div>`).join(''):'<div class="hint">Chưa có giao dịch nào.</div>';
+  b.innerHTML=`
+    <div class="kv"><span>Số dư hiện tại</span><b class="price-now" style="font-size:22px">${fmtVND(PROFILE?.balance)}</b></div>
+    <div style="margin:16px 0 8px;font-weight:800">Nạp tiền vào ví</div>
+    <div class="quick">${[50000,100000,200000,500000,1000000].map(a=>`<button onclick="document.getElementById('topupAmount').value=${a}">${fmtVND(a)}</button>`).join('')}</div>
+    <div class="field"><input id="topupAmount" type="number" placeholder="Nhập số tiền (tối thiểu 10.000)"></div>
+    <button class="btn btn-ok btn-block btn-lg" onclick="startTopup()">Tạo mã nạp (QR)</button>
+    <div id="topupResult"></div>
+    <div style="margin:22px 0 8px;font-weight:800">Lịch sử giao dịch</div>
+    ${txHtml}`;
+}
+function txLabel(t){return {topup:'💵 Nạp tiền',purchase_course:'📘 Mua khoá',purchase_vip:'👑 Mua VIP',admin_credit:'🎁 Cộng tiền'}[t]||t;}
+async function startTopup(){
+  const amt=parseInt(document.getElementById('topupAmount').value)||0;
+  if(amt<10000){toast('Số tiền tối thiểu 10.000đ','err');return;}
+  const {data,error}=await sb.rpc('create_topup',{amt});
+  if(error){toast('Lỗi: '+error.message,'err');return;}
+  if(!data.ok){toast(data.message,'err');return;}
+  const bank=cfg.BANK_CODE||'MB', acc=cfg.BANK_ACCOUNT||'', name=cfg.BANK_ACCOUNT_NAME||'';
+  const qr=`https://img.vietqr.io/image/${bank}-${acc}-compact2.png?amount=${amt}&addInfo=${encodeURIComponent(data.code)}&accountName=${encodeURIComponent(name)}`;
+  document.getElementById('topupResult').innerHTML=`
+    <div class="qr-box"><img src="${qr}" alt="QR"></div>
+    <div class="kv"><span>Ngân hàng</span><b>${esc(bank)}</b></div>
+    <div class="kv"><span>Số tài khoản</span><b>${esc(acc)}</b></div>
+    <div class="kv"><span>Chủ tài khoản</span><b>${esc(name)}</b></div>
+    <div class="kv"><span>Số tiền</span><b>${fmtVND(amt)}</b></div>
+    <div class="kv"><span>Nội dung CK (bắt buộc)</span><span class="code-pill">${data.code}</span></div>
+    <p class="hint">Chuyển khoản đúng <b>nội dung</b> ở trên. Hệ thống sẽ tự cộng tiền sau vài phút (qua SePay). Bấm “Làm mới” để kiểm tra.</p>
+    <button class="btn btn-ghost btn-block" onclick="renderWallet()">🔄 Làm mới số dư</button>
+    ${cfg.SUPPORT_ZALO?`<a class="btn btn-ghost btn-block" style="margin-top:8px" href="${esc(cfg.SUPPORT_ZALO)}" target="_blank">💬 Liên hệ hỗ trợ</a>`:''}`;
+}
+
+/* ---------- VIP ---------- */
+async function openVip(){ openM('vipModal'); const b=document.getElementById('vipBody'); b.innerHTML='<div class="empty">Đang tải…</div>';
+  if(!configured){b.innerHTML='<div class="notice">Cấu hình Supabase để bật gói VIP.</div>';return;}
+  const {data:pks}=await sb.from('packages').select('*').eq('active',true).order('sort_order');
+  if(!pks||!pks.length){b.innerHTML='<div class="hint">Chưa có gói VIP. Thêm trong trang Quản trị.</div>';return;}
+  const vip=vipActive();
+  b.innerHTML=(vip?`<div class="notice" style="border-color:rgba(52,211,153,.4);color:#86efac;background:rgba(52,211,153,.1)">✓ Bạn đang là VIP đến ${new Date(PROFILE.vip_until).toLocaleDateString('vi-VN')}.</div>`:'')+
+    pks.map((p,i)=>`<div class="vip-card ${i===1?'best':''}">
+      <h4>${esc(p.name)} ${i===1?'⭐':''}</h4>
+      <div class="p">${fmtVND(p.price)}</div>
+      <div class="hint">${esc(p.description||'')}${p.duration_days?` · ${p.duration_days} ngày`:' · Trọn đời'}</div>
+      <button class="btn btn-primary btn-block btn-lg" style="margin-top:12px" onclick="buyVip('${p.id}','${esc(p.name)}',${p.price})">${USER?'Mua gói này':'Đăng nhập để mua'}</button>
+    </div>`).join('');
+}
+async function buyVip(id,name,price){
+  if(!USER){closeM('vipModal');openAuth('login');return;}
+  if(!confirm(`Mua ${name} với giá ${fmtVND(price)}?`))return;
+  const {data,error}=await sb.rpc('purchase_vip',{pkg:id});
+  if(error){toast('Lỗi: '+error.message,'err');return;}
+  if(!data.ok){ toast(data.message,'err'); if(data.need){closeM('vipModal');openWallet();} return; }
+  await loadProfile(); await loadEnrollments(); renderAccount();
+  toast('🎉 '+data.message,'ok'); closeM('vipModal'); loadCategories(); if(CURRENT)openCategory(CURRENT.id);
+}
+
+/* ---------- MY COURSES ---------- */
+async function openMyCourses(){ if(!USER){openAuth('login');return;} openM('myModal');
+  const b=document.getElementById('myBody');
+  await loadEnrollments();
+  const owned=CATS.filter(c=>ENROLLED.has(c.id));
+  const vip=vipActive();
+  b.innerHTML=(vip?`<div class="notice" style="border-color:rgba(52,211,153,.4);color:#86efac;background:rgba(52,211,153,.1)">👑 VIP đang mở TẤT CẢ khoá đến ${new Date(PROFILE.vip_until).toLocaleDateString('vi-VN')}.</div>`:'')+
+    (owned.length?owned.map(c=>`<div class="txrow"><div>${c.icon||'📚'} <b>${esc(c.name)}</b></div><button class="btn btn-ghost btn-sm" onclick="closeM('myModal');openCategory('${c.id}')">Vào học</button></div>`).join('')
+      :(vip?'':'<div class="empty"><div class="big">📭</div>Bạn chưa mua khoá nào.</div>'));
+}
+
+/* ---------- MODAL UTILS ---------- */
+function openM(id){document.getElementById(id).classList.add('open');}
+function closeM(id){document.getElementById(id).classList.remove('open');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();['authModal','walletModal','vipModal','myModal'].forEach(closeM);}});
+
+init();
+</script>
+</body>
+</html>
