@@ -16,8 +16,8 @@ window.APP_CONFIG = {
   // --- NGÂN HÀNG NHẬN NẠP TIỀN (tạo mã QR VietQR tự động) ---
   // BANK_CODE dùng mã ngắn của VietQR: MB, VCB, ACB, TCB, TPB, VPB, BIDV, VIB, MSB, OCB...
   BANK_CODE: "MB",
-  BANK_ACCOUNT: "0000000000",          // số tài khoản nhận tiền
-  BANK_ACCOUNT_NAME: "NGUYEN VAN A",   // tên chủ tài khoản (viết HOA không dấu)
+  BANK_ACCOUNT: "044441997",          // số tài khoản nhận tiền
+    BANK_ACCOUNT_NAME: "DAO DUY KHUYEN",   // tên chủ tài khoản (viết HOA không dấu)
 
   // Liên hệ hỗ trợ (hiện ở trang nạp tiền)
   SUPPORT_ZALO: ""                     // vd: https://zalo.me/0900000000 (để trống nếu chưa có)
