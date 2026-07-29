@@ -539,11 +539,11 @@ function driveEmbedHtml(url){
 function showHome(){lessonsView.style.display='none';homeView.style.display='block';window.scrollTo({top:0,behavior:'smooth'});}
 
 /* ---------- PLAY VIDEO ---------- */
-async function toggleSub(gi){
+function toggleSub(gi){
     var box=document.getElementById('sb'+gi); if(!box) return;
     var wrap=box.closest('.subcourse'); if(wrap) wrap.classList.toggle('open');
   }
-  function playLesson(lessonId,canPlay){
+  async function playLesson(lessonId,canPlay){
   if(!canPlay){ toast('🔒 Cần mua khoá để xem bài này','err'); return; }
   let url=null;
   if(configured){ const {data}=await sb.rpc('get_video',{lesson:lessonId}); url=data; }
