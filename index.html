@@ -177,7 +177,14 @@
   .txrow .a.minus{color:#fca5a5;font-weight:800}
 
   .notice{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);color:#fcd34d;padding:12px 16px;border-radius:12px;font-size:14px;margin:18px 0}
-  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--card2);border:1px solid var(--line);padding:12px 20px;border-radius:12px;font-weight:700;font-size:14px;z-index:200;display:none;box-shadow:0 12px 30px -10px #000;max-width:90vw;text-align:center}
+  .promo-wrap{display:flex;flex-direction:column;gap:10px;margin:0 auto 4px;max-width:1120px;padding:0 20px}
+.promo{position:relative;display:flex;align-items:flex-start;gap:12px;background:linear-gradient(90deg,rgba(124,92,255,.18),rgba(52,211,153,.12));border:1px solid rgba(124,92,255,.45);border-radius:14px;padding:14px 44px 14px 16px}
+.promo .ico{font-size:22px;line-height:1.2}
+.promo .pt{font-weight:700;margin:0 0 2px}
+.promo .pb{color:var(--muted);font-size:14px;margin:0;white-space:pre-wrap}
+.promo .px{position:absolute;top:8px;right:10px;cursor:pointer;background:none;border:none;color:var(--muted);font-size:20px;line-height:1}
+.promo .px:hover{color:#fff}
+    .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--card2);border:1px solid var(--line);padding:12px 20px;border-radius:12px;font-weight:700;font-size:14px;z-index:200;display:none;box-shadow:0 12px 30px -10px #000;max-width:90vw;text-align:center}
   .toast.show{display:block}
   .toast.ok{border-color:rgba(52,211,153,.5)}.toast.err{border-color:rgba(239,68,68,.5)}
   footer{border-top:1px solid var(--line);padding:30px 0;color:var(--muted);font-size:14px;text-align:center;margin-top:40px}
@@ -206,6 +213,7 @@
 
 <!-- HOME -->
 <main id="homeView">
+  <div id="promoBar" class="promo-wrap"></div>
   <section class="hero wrap">
     <div class="badge">✨ Học mọi lúc — thanh toán linh hoạt bằng ví</div>
     <h1>Làm chủ <span class="grad">Marketing thực chiến</span></h1>
@@ -382,6 +390,28 @@ function toEmbed(url){if(!url)return null;let m;
   return{type:'iframe',src:url};}
 
 /* ---------- INIT ---------- */
+async function loadAnnouncements(){
+  const bar=document.getElementById('promoBar'); if(!bar) return;
+  if(!configured){ bar.innerHTML=''; return; }
+  try{
+    const {data,error}=await sb.from('announcements').select('*').eq('active',true).order('created_at',{ascending:false});
+    if(error){ bar.innerHTML=''; return; }
+    const dismissed=JSON.parse(localStorage.getItem('promoDismissed')||'[]');
+    const list=(data||[]).filter(a=>!dismissed.includes(a.id));
+    bar.innerHTML = list.map(a=>{
+      const ico=a.icon||'📢';
+      const title=(a.title||'').replace(/</g,'&lt;');
+      const body=(a.body||'').replace(/</g,'&lt;');
+      return '<div class="promo"><div class="ico">'+ico+'</div><div><p class="pt">'+title+'</p>'+(body?'<p class="pb">'+body+'</p>':'')+'</div><button class="px" title="Đóng" onclick="dismissPromo(\''+a.id+'\')">×</button></div>';
+    }).join('');
+  }catch(e){ bar.innerHTML=''; }
+}
+function dismissPromo(id){
+  const d=JSON.parse(localStorage.getItem('promoDismissed')||'[]');
+  if(!d.includes(id)) d.push(id);
+  localStorage.setItem('promoDismissed',JSON.stringify(d));
+  loadAnnouncements();
+}
 async function init(){
   if(configured){
     const {data:{session}} = await sb.auth.getSession();
@@ -390,6 +420,7 @@ async function init(){
   }
   renderAccount();
   await loadCategories();
+  loadAnnouncements();
 }
 async function loadProfile(){ if(!USER)return; const {data}=await sb.from('profiles').select('*').eq('id',USER.id).maybeSingle(); PROFILE=data||{balance:0}; }
 async function loadEnrollments(){ if(!USER){ENROLLED=new Set();return;} const {data}=await sb.from('enrollments').select('category_id').eq('user_id',USER.id); ENROLLED=new Set((data||[]).map(x=>x.category_id)); }
@@ -578,7 +609,7 @@ async function submitAuth(){
     if(authCur==='register'){
       const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{full_name:auName.value.trim()}}});
       if(error) throw error;
-      if(!data.session){ msg.className='msg ok'; msg.textContent='✅ Đã tạo tài khoản! Kiểm tra email để xác nhận rồi đăng nhập.'; auBtn.disabled=false; auBtn.textContent='Tạo tài khoản'; return; }
+      if(!data.session){ toast('✅ Đăng ký thành công! Kiểm tra email để xác nhận, rồi đăng nhập.','ok'); auMsg.className='msg ok'; auMsg.textContent='✅ Tạo tài khoản thành công! Hãy đăng nhập.'; auPass.value=''; authMode('login'); auBtn.disabled=false; return; }
       USER=data.user;
     }else{
       const {data,error}=await sb.auth.signInWithPassword({email,password:pass});
