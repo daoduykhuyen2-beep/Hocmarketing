@@ -181,6 +181,18 @@
   .toast.show{display:block}
   .toast.ok{border-color:rgba(52,211,153,.5)}.toast.err{border-color:rgba(239,68,68,.5)}
   footer{border-top:1px solid var(--line);padding:30px 0;color:var(--muted);font-size:14px;text-align:center;margin-top:40px}
+
+  /* ---- Khóa con (accordion) ---- */
+  #lessonGrid{display:block;margin-top:22px}
+  .subcourse{background:var(--card);border:1px solid var(--line);border-radius:16px;margin-bottom:14px;overflow:hidden}
+  .sub-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;cursor:pointer;user-select:none;transition:.15s}
+  .sub-head:hover{background:var(--card2)}
+  .sub-title{display:flex;align-items:center;gap:10px;font-weight:800;font-size:16px}
+  .sub-caret{display:inline-block;transition:transform .2s;color:var(--accent);font-size:14px}
+  .subcourse.open .sub-caret{transform:rotate(90deg)}
+  .sub-count{font-size:13px;font-weight:700;color:var(--muted);background:rgba(255,255,255,.06);border:1px solid var(--line);padding:4px 10px;border-radius:999px;white-space:nowrap}
+  .sub-body{display:none;padding:0 16px 16px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+  .subcourse.open .sub-body{display:grid}
 </style>
 </head>
 <body>
@@ -465,7 +477,14 @@ async function openCategory(id){
 
   // Danh sách bài giảng (miễn phí xem thử; còn lại khoá nếu chưa mua)
   if(lessons.length){
-    grid.innerHTML='<h3 style="margin:6px 0 2px;font-size:18px">🎬 Bài giảng</h3>'+lessons.map(l=>{
+    const grid=document.getElementById('lessonGrid');
+    const groups=[]; const gmap={};
+    lessons.forEach(l=>{
+      const key=(l.title&&l.title.indexOf(' / ')>0)?l.title.split(' / ')[0].trim():'Bài giảng';
+      if(!gmap[key]){gmap[key]={name:key,items:[]};groups.push(gmap[key]);}
+      gmap[key].items.push(l);
+    });
+    const cardHtml=(l)=>{
       const canPlay=l.is_free||access;
       return `<div class="lesson" onclick="playLesson('${l.id}',${canPlay})">
         <div class="thumb">
@@ -475,6 +494,16 @@ async function openCategory(id){
           ${l.duration?`<span class="dur">${esc(l.duration)}</span>`:''}
         </div>
         <div class="body"><h4>${esc(l.title)}</h4>${l.description?`<p>${esc(l.description)}</p>`:''}</div>
+      </div>`;
+    };
+    grid.innerHTML='<h3 style="margin:6px 0 10px;font-size:18px">🎬 Nội dung khoá học</h3>'+groups.map((g,gi)=>{
+      const cnt=g.items.length;
+      return `<div class="subcourse">
+        <div class="sub-head" onclick="toggleSub(${gi})">
+          <div class="sub-title"><span class="sub-caret" id="sc${gi}">▸</span> ${esc(g.name)}</div>
+          <span class="sub-count">${cnt} video</span>
+        </div>
+        <div class="sub-body" id="sb${gi}">${g.items.map(cardHtml).join('')}</div>
       </div>`;
     }).join('');
   }
@@ -510,7 +539,11 @@ function driveEmbedHtml(url){
 function showHome(){lessonsView.style.display='none';homeView.style.display='block';window.scrollTo({top:0,behavior:'smooth'});}
 
 /* ---------- PLAY VIDEO ---------- */
-async function playLesson(lessonId,canPlay){
+async function toggleSub(gi){
+    var box=document.getElementById('sb'+gi); if(!box) return;
+    var wrap=box.closest('.subcourse'); if(wrap) wrap.classList.toggle('open');
+  }
+  function playLesson(lessonId,canPlay){
   if(!canPlay){ toast('🔒 Cần mua khoá để xem bài này','err'); return; }
   let url=null;
   if(configured){ const {data}=await sb.rpc('get_video',{lesson:lessonId}); url=data; }
