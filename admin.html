@@ -239,7 +239,7 @@
     <h3 id="lessonModalTitle">Thêm bài giảng</h3>
     <input type="hidden" id="lessonId">
     <div class="field"><label>Khoá học *</label><select id="lessonCat"></select></div>
-    <div class="field"><label>Tiêu đề bài giảng *</label><input id="lessonTitle" placeholder="VD: Bài 1 — Xây kênh TikTok từ 0"></div>
+    <div class="field"><label>Khóa con (tùy chọn)</label><input id="lessonSub" placeholder="VD: AFFILIATE MARKETING (để trống nếu không thuộc khóa con)"></div><div class="field"><label>Tiêu đề bài giảng *</label><input id="lessonTitle" placeholder="VD: Bài 1 — Xây kênh TikTok từ 0"></div>
     <div class="field"><label>Mô tả</label><textarea id="lessonDesc" placeholder="Nội dung bài học"></textarea></div>
     <div class="field">
       <label>Link video (YouTube / Vimeo / Google Drive / MP4)</label>
@@ -443,7 +443,7 @@ function renderLessons(){
 function openLessonModal(){
   if(!CATS.length){ toast('Hãy tạo ít nhất 1 khoá học trước.','err'); switchTab('cats'); return; }
   document.getElementById('lessonModalTitle').textContent='Thêm bài giảng';
-  ['lessonId','lessonTitle','lessonDesc','lessonVideo','lessonThumb','lessonDur'].forEach(id=>document.getElementById(id).value='');
+  ['lessonId','lessonSub','lessonTitle','lessonDesc','lessonVideo','lessonThumb','lessonDur'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('lessonOrder').value='0';
   document.getElementById('lessonFree').checked=true;
   const f=document.getElementById('filterCat').value; if(f)document.getElementById('lessonCat').value=f;
@@ -456,7 +456,7 @@ function editLesson(id){
   document.getElementById('lessonModalTitle').textContent='Sửa bài giảng';
   document.getElementById('lessonId').value=l.id;
   document.getElementById('lessonCat').value=l.category_id;
-  document.getElementById('lessonTitle').value=l.title;
+  {const _t=l.title||''; const _ix=_t.indexOf(' / '); if(_ix>-1){document.getElementById('lessonSub').value=_t.slice(0,_ix).trim(); document.getElementById('lessonTitle').value=_t.slice(_ix+3).trim();} else {document.getElementById('lessonSub').value=''; document.getElementById('lessonTitle').value=_t;}}
   document.getElementById('lessonDesc').value=l.description||'';
   document.getElementById('lessonVideo').value=l.video_url||'';
   document.getElementById('lessonThumb').value=l.thumbnail_url||'';
@@ -469,7 +469,9 @@ function editLesson(id){
 }
 async function saveLesson(){
   const msg=document.getElementById('lessonMsg'); msg.className='msg';
-  const title=document.getElementById('lessonTitle').value.trim();
+  let title=document.getElementById('lessonTitle').value.trim();
+  const _sub=(document.getElementById('lessonSub')?.value||'').trim();
+  if(_sub) title=_sub+' / '+title;
   const category_id=document.getElementById('lessonCat').value;
   if(!category_id){ msg.className='msg err'; msg.textContent='Chọn khoá học.'; return; }
   if(!title){ msg.className='msg err'; msg.textContent='Nhập tiêu đề.'; return; }
