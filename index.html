@@ -581,7 +581,7 @@ function toggleSub(gi){
     var box=document.getElementById('sb'+gi); if(!box) return;
     var wrap=box.closest('.subcourse'); if(wrap) wrap.classList.toggle('open');
   }
-  async function playLesson(lessonId,canPlay){
+  async function playLesson(lessonId,canPlay){try{
   if(!canPlay){ toast('🔒 Cần mua khoá để xem bài này','err'); return; }
   let url=null;
   if(configured){ const {data}=await sb.rpc('get_video',{lesson:lessonId}); url=data; }
@@ -589,7 +589,7 @@ function toggleSub(gi){
   const e=toEmbed(url); const box=document.getElementById('modalVideo');
   box.innerHTML = e.type==='video'?`<video src="${e.src}" controls autoplay playsinline></video>`:`<iframe src="${e.src}" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
   document.getElementById('modal').classList.add('open');
-}
+}catch(_e){toast('⚠️ Có lỗi kết nối, vui lòng thử lại!','err');}}
 function closeModal(){document.getElementById('modal').classList.remove('open');document.getElementById('modalVideo').innerHTML='';}
 
 /* ---------- AUTH ---------- */
@@ -625,7 +625,7 @@ function viErr(m){if(/Invalid login/i.test(m))return'Sai email hoặc mật kh�
 async function logout(){ await sb.auth.signOut(); USER=null;PROFILE=null;ENROLLED=new Set(); renderAccount(); await loadCategories(); showHome(); toast('Đã đăng xuất'); }
 
 /* ---------- BUY ---------- */
-async function buyCourse(id){
+async function buyCourse(id){try{
   if(!USER){openAuth('login');return;}
   const c=CATS.find(x=>x.id===id);
   if(c.price>0 && !confirm(`Mua khoá "${c.name}" với giá ${fmtVND(c.price)}?\nSố dư sẽ bị trừ tương ứng.`)) return;
@@ -634,7 +634,7 @@ async function buyCourse(id){
   if(!data.ok){ toast(data.message,'err'); if(data.need){openWallet();} return; }
   await loadProfile(); await loadEnrollments(); renderAccount();
   toast('🎉 '+data.message,'ok'); openCategory(id); loadCategories();
-}
+}catch(_e){toast('⚠️ Có lỗi kết nối, vui lòng thử lại!','err');}}
 
 /* ---------- WALLET ---------- */
 async function openWallet(){ if(!USER){openAuth('login');return;} openM('walletModal'); await renderWallet(); }
@@ -655,7 +655,7 @@ async function renderWallet(){
     ${txHtml}`;
 }
 function txLabel(t){return {topup:'💵 Nạp tiền',purchase_course:'📘 Mua khoá',purchase_vip:'👑 Mua VIP',admin_credit:'🎁 Cộng tiền'}[t]||t;}
-async function startTopup(){
+async function startTopup(){try{
   const amt=parseInt(document.getElementById('topupAmount').value)||0;
   if(amt<10000){toast('Số tiền tối thiểu 10.000đ','err');return;}
   const {data,error}=await sb.rpc('create_topup',{amt});
@@ -673,7 +673,7 @@ async function startTopup(){
     <p class="hint">Chuyển khoản đúng <b>nội dung</b> ở trên. Hệ thống sẽ tự cộng tiền sau vài phút (qua SePay). Bấm “Làm mới” để kiểm tra.</p>
     <button class="btn btn-ghost btn-block" onclick="renderWallet()">🔄 Làm mới số dư</button>
     ${cfg.SUPPORT_ZALO?`<a class="btn btn-ghost btn-block" style="margin-top:8px" href="${esc(cfg.SUPPORT_ZALO)}" target="_blank">💬 Liên hệ hỗ trợ</a>`:''}`;
-}
+}catch(_e){toast('⚠️ Có lỗi kết nối, vui lòng thử lại!','err');}}
 
 /* ---------- VIP ---------- */
 async function openVip(){ openM('vipModal'); const b=document.getElementById('vipBody'); b.innerHTML='<div class="empty">Đang tải…</div>';
@@ -689,7 +689,7 @@ async function openVip(){ openM('vipModal'); const b=document.getElementById('vi
       <button class="btn btn-primary btn-block btn-lg" style="margin-top:12px" onclick="buyVip('${p.id}','${esc(p.name)}',${p.price})">${USER?'Mua gói này':'Đăng nhập để mua'}</button>
     </div>`).join('');
 }
-async function buyVip(id,name,price){
+async function buyVip(id,name,price){try{
   if(!USER){closeM('vipModal');openAuth('login');return;}
   if(!confirm(`Mua ${name} với giá ${fmtVND(price)}?`))return;
   const {data,error}=await sb.rpc('purchase_vip',{pkg:id});
@@ -697,7 +697,7 @@ async function buyVip(id,name,price){
   if(!data.ok){ toast(data.message,'err'); if(data.need){closeM('vipModal');openWallet();} return; }
   await loadProfile(); await loadEnrollments(); renderAccount();
   toast('🎉 '+data.message,'ok'); closeM('vipModal'); loadCategories(); if(CURRENT)openCategory(CURRENT.id);
-}
+}catch(_e){toast('⚠️ Có lỗi kết nối, vui lòng thử lại!','err');}}
 
 /* ---------- MY COURSES ---------- */
 async function openMyCourses(){ if(!USER){openAuth('login');return;} openM('myModal');
