@@ -18,7 +18,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Học Viện Marketing — Khoá học thực chiến">
   <meta name="twitter:description" content="Nền tảng khoá học marketing thực chiến: ChatGPT, Affiliate, Canva, CapCut, bán hàng livestream và nhiều hơn nữa.">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+  <link rel="icon" type="image/png" href="/logo.png">
   <style>
   :root{
     --bg:#0b1020;--bg2:#0f1630;--card:#141c3a;--card2:#1a2450;
@@ -42,7 +42,7 @@
   header{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(11,16,32,.78);border-bottom:1px solid var(--line)}
   .nav{display:flex;align-items:center;justify-content:space-between;height:66px;gap:12px}
   .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px}
-  .logo .mark{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(135deg,var(--brand),var(--brand2));font-size:19px}
+  .logo .mark{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:#fff;overflow:hidden;padding:3px;box-sizing:border-box;font-size:19px}
   .nav-actions{display:flex;gap:10px;align-items:center}
   .btn{border:0;cursor:pointer;font-weight:700;border-radius:12px;padding:10px 18px;font-size:14px;transition:.2s;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
   .btn:disabled{opacity:.5;cursor:not-allowed}
@@ -205,7 +205,7 @@
 <body>
 <header>
   <div class="wrap nav">
-    <a class="logo" href="#" onclick="showHome();return false"><span class="mark">🎓</span><span id="siteName">Học Viện Marketing</span></a>
+    <a class="logo" href="#" onclick="showHome();return false"><span class="mark"><img src="/logo.png" alt="Logo" style="width:100%;height:100%;object-fit:contain"></span><span id="siteName">Học Viện Marketing</span></a>
     <div class="nav-actions" id="accountArea"></div>
   </div>
 </header>
