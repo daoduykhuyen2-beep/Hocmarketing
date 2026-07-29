@@ -327,7 +327,7 @@ if(cfg.SITE_TAGLINE) tagline.textContent=cfg.SITE_TAGLINE;
 const configured = cfg.SUPABASE_URL && cfg.SUPABASE_URL.startsWith('http') && cfg.SUPABASE_ANON_KEY && cfg.SUPABASE_ANON_KEY.length>20;
 let sb=null; if(configured) sb=supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
 
-let USER=null, PROFILE=null, ENROLLED=new Set(), CATS=[], CURRENT=null;
+let USER=null, PROFILE=null, ENROLLED=new Set(), ENROLL_EXP=new Map(), CATS=[], CURRENT=null;
 
 /* ---------- DEMO DATA (khi chưa cấu hình Supabase) ---------- */
 const DEMO_CATS = [
@@ -423,7 +423,7 @@ async function init(){
   loadAnnouncements();
 }
 async function loadProfile(){ if(!USER)return; const {data}=await sb.from('profiles').select('*').eq('id',USER.id).maybeSingle(); PROFILE=data||{balance:0}; }
-async function loadEnrollments(){ if(!USER){ENROLLED=new Set();return;} const {data}=await sb.from('enrollments').select('category_id').eq('user_id',USER.id); ENROLLED=new Set((data||[]).map(x=>x.category_id)); }
+async function loadEnrollments(){ if(!USER){ENROLLED=new Set();return;} const {data}=await sb.from('enrollments').select('category_id,expires_at').eq('user_id',USER.id); ENROLLED=new Set((data||[]).map(x=>x.category_id)); ENROLL_EXP=new Map((data||[]).map(x=>[x.category_id,x.expires_at])); }
 
 /* ---------- ACCOUNT UI ---------- */
 function renderAccount(){
@@ -700,13 +700,20 @@ async function buyVip(id,name,price){try{
 }catch(_e){toast('⚠️ Có lỗi kết nối, vui lòng thử lại!','err');}}
 
 /* ---------- MY COURSES ---------- */
-async function openMyCourses(){ if(!USER){openAuth('login');return;} openM('myModal');
+async function daysBadge(catId){
+    const exp=ENROLL_EXP.get(catId); if(!exp) return '';
+    const ms=new Date(exp)-new Date(); const d=Math.ceil(ms/86400000);
+    if(d<=0) return ' <span style="color:#f87171;font-size:12px;font-weight:600">(Đã hết hạn)</span>';
+    const col=d<=7?'#fbbf24':'#86efac';
+    return ' <span style="color:'+col+';font-size:12px;font-weight:600">(Còn '+d+' ngày)</span>';
+  }
+  function openMyCourses(){ if(!USER){openAuth('login');return;} openM('myModal');
   const b=document.getElementById('myBody');
   await loadEnrollments();
   const owned=CATS.filter(c=>ENROLLED.has(c.id));
   const vip=vipActive();
   b.innerHTML=(vip?`<div class="notice" style="border-color:rgba(52,211,153,.4);color:#86efac;background:rgba(52,211,153,.1)">👑 VIP đang mở TẤT CẢ khoá đến ${new Date(PROFILE.vip_until).toLocaleDateString('vi-VN')}.</div>`:'')+
-    (owned.length?owned.map(c=>`<div class="txrow"><div>${c.icon||'📚'} <b>${esc(c.name)}</b></div><button class="btn btn-ghost btn-sm" onclick="closeM('myModal');openCategory('${c.id}')">Vào học</button></div>`).join('')
+    (owned.length?owned.map(c=>`<div class="txrow"><div>${c.icon||'📚'} <b>${esc(c.name)}</b>${daysBadge(c.id)}</div><button class="btn btn-ghost btn-sm" onclick="closeM('myModal');openCategory('${c.id}')">Vào học</button></div>`).join('')
       :(vip?'':'<div class="empty"><div class="big">📭</div>Bạn chưa mua khoá nào.</div>'));
 }
 
