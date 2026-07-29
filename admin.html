@@ -134,6 +134,7 @@
       <div class="tab" data-tab="students" onclick="switchTab('students')">👥 Học viên</div>
       <div class="tab" data-tab="packages" onclick="switchTab('packages')">👑 Gói VIP</div>
       <div class="tab" data-tab="topups" onclick="switchTab('topups')">💳 Nạp tiền</div>
+      <div class="tab" data-tab="announce" onclick="switchTab('announce')">📢 Thông báo</div>
     </div>
 
     <!-- CATEGORIES PANEL -->
@@ -178,6 +179,18 @@
       <div class="list" id="topupList"></div>
       <h3 style="margin:22px 0 10px;font-size:16px">Giao dịch gần đây</h3>
       <div class="list" id="txList"></div>
+    </div>
+
+    <!-- ANNOUNCE PANEL -->
+    <div class="panel" id="panel-announce">
+      <div class="panel-head"><h2>📢 Thông báo / Khuyến mãi</h2><button class="btn btn-ghost" onclick="loadAnnounce()">🔄 Làm mới</button></div>
+      <p style="color:var(--muted);font-size:14px;margin-bottom:14px">Thông báo bật sẽ hiện trên đầu trang chủ cho tất cả mọi người (kể cả khách chưa đăng nhập).</p>
+      <div class="field" style="max-width:120px"><label>Biểu tượng</label><input id="annIcon" value="📢" placeholder="📢"></div>
+      <div class="field"><label>Tiêu đề *</label><input id="annTitle" placeholder="VD: Khuyến mãi 20% tháng 8!"></div>
+      <div class="field"><label>Nội dung</label><textarea id="annBody" rows="3" placeholder="Mô tả chi tiết chương trình..."></textarea></div>
+      <button class="btn btn-primary" id="annSaveBtn" onclick="saveAnnounce()">+ Đăng thông báo</button>
+      <h3 style="margin:22px 0 10px;font-size:16px">Danh sách thông báo</h3>
+      <div class="list" id="annList"></div>
     </div>
   </div>
 </div>
@@ -639,13 +652,44 @@ async function confirmTopup(id){
 }
 
 /* ---------- UI HELPERS ---------- */
+async function loadAnnounce(){
+  const box=document.getElementById('annList'); box.innerHTML='Đang tải…';
+  const {data,error}=await sb.from('announcements').select('*').order('created_at',{ascending:false});
+  if(error){ box.innerHTML='<div class="empty">Lỗi tải (đã tạo bảng announcements chưa?)</div>'; return; }
+  if(!data.length){ box.innerHTML='<div class="empty">Chưa có thông báo nào.</div>'; return; }
+  box.innerHTML=data.map(a=>`<div class="row"><div class="main"><h4>${a.icon||'📢'} ${esc(a.title)} ${a.active?'<span class="tag">ĐANG BẬT</span>':'<span class="tag" style="opacity:.5">ĐÃ TẮT</span>'}</h4><div style="color:var(--muted);font-size:13px;white-space:pre-wrap">${esc(a.body||'')}</div></div><div class="acts"><button class="btn btn-ghost btn-sm" onclick='toggleAnnounce(${JSON.stringify(a.id)},${a.active})'>${a.active?'Tắt':'Bật'}</button><button class="btn btn-danger btn-sm" onclick='delAnnounce(${JSON.stringify(a.id)})'>🗑</button></div></div>`).join('');
+}
+async function saveAnnounce(){
+  const title=document.getElementById('annTitle').value.trim();
+  if(!title){ toast('Nhập tiêu đề thông báo.','err'); return; }
+  const icon=document.getElementById('annIcon').value.trim()||'📢';
+  const body=document.getElementById('annBody').value.trim();
+  const btn=document.getElementById('annSaveBtn'); btn.disabled=true;
+  const {error}=await sb.from('announcements').insert({icon,title,body,active:true});
+  btn.disabled=false;
+  if(error){ toast('Lỗi: '+error.message,'err'); return; }
+  document.getElementById('annTitle').value=''; document.getElementById('annBody').value=''; document.getElementById('annIcon').value='📢';
+  toast('Đã đăng thông báo ✓','ok'); loadAnnounce();
+}
+async function toggleAnnounce(id,cur){
+  const {error}=await sb.from('announcements').update({active:!cur}).eq('id',id);
+  if(error){ toast('Lỗi: '+error.message,'err'); return; }
+  toast(!cur?'Đã bật ✓':'Đã tắt ✓','ok'); loadAnnounce();
+}
+async function delAnnounce(id){
+  if(!confirm('Xoá thông báo này?')) return;
+  const {error}=await sb.from('announcements').delete().eq('id',id);
+  if(error){ toast('Lỗi: '+error.message,'err'); return; }
+  toast('Đã xoá ✓','ok'); loadAnnounce();
+}
 function switchTab(t){
   document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===t));
-  ['cats','lessons','students','packages','topups'].forEach(k=>
+  ['cats','lessons','students','packages','topups','announce'].forEach(k=>
     document.getElementById('panel-'+k).classList.toggle('active',t===k));
   if(t==='students') loadStudents();
   if(t==='packages') loadPackages();
   if(t==='topups') loadTopups();
+  if(t==='announce') loadAnnounce();
 }
 function openModal(id){document.getElementById(id).classList.add('open')}
 function closeModal(id){document.getElementById(id).classList.remove('open')}
