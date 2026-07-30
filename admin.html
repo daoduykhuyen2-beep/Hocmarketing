@@ -536,24 +536,48 @@ async function uploadFile(input, targetId, kind){
 /* ========== HỌC VIÊN ========== */
 let STUDENTS=[];
 async function loadStudents(){
-  const el=document.getElementById('studentList'); el.innerHTML='<div class="empty">Đang tải…</div>';
-  const {data,error}=await sb.from('profiles').select('*').order('created_at',{ascending:false});
-  if(error){ el.innerHTML='<div class="empty">Lỗi: '+esc(error.message)+'</div>'; return; }
-  STUDENTS=data||[]; renderStudents();
+  const el=document.getElementById('studentList');
+  if(el) el.innerHTML='<div class="empty">Đang tải...</div>';
+  let rows=null;
+  const r=await sb.rpc('admin_list_users');
+  if(!r.error && r.data){ rows=r.data; }
+  else {
+    const r2=await sb.from('profiles').select('*').order('created_at',{ascending:false});
+    rows=r2.data||[];
+  }
+  STUDENTS=rows||[];
+  renderStudents();
 }
 function vnd(n){return Number(n||0).toLocaleString('vi-VN')+'đ';}
 function isVip(p){return p.vip_until && new Date(p.vip_until)>new Date();}
 function renderStudents(){
-  const q=(document.getElementById('studentSearch').value||'').toLowerCase();
-  const list=STUDENTS.filter(s=>!q||(s.email||'').toLowerCase().includes(q));
-  const el=document.getElementById('studentList');
-  if(!list.length){ el.innerHTML='<div class="empty"><div class="big">👥</div>Chưa có học viên.</div>'; return; }
-  el.innerHTML=list.map(s=>`<div class="item">
-    <div class="ic">${(s.email||'?')[0].toUpperCase()}</div>
-    <div class="main"><h4>${esc(s.email||'—')} ${s.is_admin?'<span class="tag">ADMIN</span>':''} ${isVip(s)?'<span class="tag free">VIP</span>':''}</h4>
-      <p>Số dư: <b style="color:#34d399">${vnd(s.balance)}</b>${isVip(s)?' · VIP đến '+new Date(s.vip_until).toLocaleDateString('vi-VN'):''}</p></div>
-    <div class="acts"><button class="btn btn-ghost btn-sm" onclick='creditStudent(${JSON.stringify(s.id)},${JSON.stringify(s.email||"")})'>💵 Cộng tiền</button></div>
-  </div>`).join('');
+  const el=document.getElementById('studentList'); if(!el) return;
+  const q=(document.getElementById('studentSearch')?.value||'').toLowerCase().trim();
+  let list=STUDENTS.slice();
+  if(q) list=list.filter(s=>((s.email||'')+' '+(s.full_name||'')).toLowerCase().includes(q));
+  const now=Date.now();
+  const total=STUDENTS.length;
+  const a1=STUDENTS.filter(s=>s.last_sign_in_at && (now-new Date(s.last_sign_in_at).getTime())<864e5).length;
+  const a7=STUDENTS.filter(s=>s.last_sign_in_at && (now-new Date(s.last_sign_in_at).getTime())<7*864e5).length;
+  const vc=STUDENTS.filter(s=>s.vip_until && new Date(s.vip_until).getTime()>now).length;
+  const box=(n,l)=>'<div style="flex:1;min-width:120px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px"><div style="font-size:24px;font-weight:800">'+n+'</div><div style="color:var(--muted);font-size:12px">'+l+'</div></div>';
+  const stat='<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">'+box(total,'Tổng tài khoản')+box(a1,'Đăng nhập 24h')+box(a7,'Đăng nhập 7 ngày')+box(vc,'Đang có VIP')+'</div>';
+  if(!list.length){ el.innerHTML=stat+'<div class="empty">Không có tài khoản.</div>'; return; }
+  const rows=list.map(s=>{
+    const vip=s.vip_until && new Date(s.vip_until).getTime()>now;
+    const vipTag=vip?('<span class="tag free">VIP đến '+new Date(s.vip_until).toLocaleDateString('vi-VN')+'</span>'):'<span class="tag">Chưa VIP</span>';
+    const adminTag=s.is_admin?'<span class="tag free">ADMIN</span>':'';
+    const last=s.last_sign_in_at?('Đăng nhập gần nhất: '+new Date(s.last_sign_in_at).toLocaleString('vi-VN')):'Chưa đăng nhập lần nào';
+    return '<div class="item">'
+      +'<div class="ic">👤</div>'
+      +'<div class="main"><h4>'+esc(s.email||'(không email)')+' '+adminTag+' '+vipTag+'</h4>'
+      +'<p><b style="color:#34d399">'+fmtVND(s.balance||0)+'</b> · '+esc(last)+'</p></div>'
+      +'<div class="acts">'
+        +'<button class="btn btn-ghost btn-sm" onclick=\'creditStudent('+JSON.stringify(s.id)+','+JSON.stringify(s.email||'')+')\'>Nạp tiền</button>'
+        +'<button class="btn btn-ghost btn-sm" onclick=\'grantVip('+JSON.stringify(s.id)+','+JSON.stringify(s.email||'')+')\'>Nâng VIP</button>'
+      +'</div></div>';
+  }).join('');
+  el.innerHTML=stat+rows;
 }
 async function creditStudent(id,email){
   const v=prompt(`Cộng tiền cho ${email}\nNhập số tiền (âm để trừ):`,'100000');
@@ -562,6 +586,17 @@ async function creditStudent(id,email){
   if(error){toast('Lỗi: '+error.message,'err');return;}
   if(!data.ok){toast(data.message,'err');return;}
   toast('Đã cập nhật số dư ✓','ok'); loadStudents();
+}
+async function grantVip(id,email){
+  const raw=prompt('Nâng VIP cho '+email+'\nNhập số NGÀY muốn cộng thêm (ví dụ 30):','30');
+  if(raw===null) return;
+  const days=parseInt(raw,10);
+  if(!Number.isFinite(days)||days===0){ toast('Số ngày không hợp lệ','err'); return; }
+  const {data,error}=await sb.rpc('admin_set_vip',{target:id,p_days:days});
+  if(error){ toast(viErr(error),'err'); return; }
+  if(data && data.ok===false){ toast(data.error||'Lỗi','err'); return; }
+  toast('Đã nâng VIP '+days+' ngày cho '+email,'ok');
+  loadStudents();
 }
 
 /* ========== GÓI VIP ========== */
