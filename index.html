@@ -267,6 +267,13 @@
       <div id="pwBar" style="height:6px;border-radius:4px;background:#eee;margin-top:6px;overflow:hidden"><div id="pwBarFill" style="height:100%;width:0;transition:.25s"></div></div>
       <div id="pwHint" style="font-size:12px;margin-top:4px;color:#888"></div>
     </div>
+    <div class="field" id="pass2Field" style="display:none"><label>Xác nhận mật khẩu</label>
+      <input id="auPass2" type="password" placeholder="Nhập lại mật khẩu" oninput="pwMatch()">
+      <div id="pw2Hint" style="font-size:12px;margin-top:4px;color:#888"></div>
+    </div>
+    <label id="rememberField" style="display:flex;align-items:center;gap:8px;font-size:14px;margin:4px 0 12px;cursor:pointer;color:var(--muted,#888)">
+      <input id="auRemember" type="checkbox" checked style="width:16px;height:16px;cursor:pointer"> Ghi nhớ đăng nhập
+    </label>
     <button class="btn btn-primary btn-block btn-lg" id="auBtn" onclick="submitAuth()">Đăng nhập</button>
     <div class="msg" id="auMsg"></div>
   </div>
@@ -414,6 +421,7 @@ function dismissPromo(id){
 }
 async function init(){
   if(configured){
+    try{ if(localStorage.getItem('au_no_remember')==='1' && !sessionStorage.getItem('au_alive')){ await sb.auth.signOut(); } sessionStorage.setItem('au_alive','1'); }catch(_e){}
     const {data:{session}} = await sb.auth.getSession();
     if(session){ USER=session.user; await loadProfile(); await loadEnrollments(); }
     sb.auth.onAuthStateChange((_e,s)=>{ /* giữ đồng bộ khi refresh token */ });
@@ -600,13 +608,18 @@ function authMode(m){authCur=m;
   authTitle.textContent=m==='login'?'Đăng nhập':'Đăng ký tài khoản';
   nameField.style.display=m==='register'?'block':'none';
   auBtn.textContent=m==='login'?'Đăng nhập':'Tạo tài khoản';
+  var _p2=document.getElementById('pass2Field'); if(_p2) _p2.style.display=m==='register'?'block':'none';
+  var _rm=document.getElementById('rememberField'); if(_rm) _rm.style.display=m==='login'?'flex':'none';
+  var _p2h=document.getElementById('pw2Hint'); if(_p2h) _p2h.textContent='';
 }
 async function submitAuth(){
   const email=auEmail.value.trim(), pass=auPass.value, msg=document.getElementById('auMsg'); msg.className='msg';
   if(!email||!pass){msg.className='msg err';msg.textContent='Nhập email và mật khẩu.';return;}
+  try{ var _rm=document.getElementById('auRemember'); if(authCur==='login' && _rm){ if(_rm.checked) localStorage.removeItem('au_no_remember'); else localStorage.setItem('au_no_remember','1'); } }catch(_e){}
   auBtn.disabled=true; auBtn.textContent='Đang xử lý…';
   try{
     if(authCur==='register'){
+      if(auPass2.value!==pass){ msg.className='msg err'; msg.textContent='Mật khẩu xác nhận không khớp.'; auBtn.disabled=false; auBtn.textContent='Tạo tài khoản'; return; }
       const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{full_name:auName.value.trim()}}});
       if(error) throw error;
       if(!data.session){ toast('✅ Đăng ký thành công! Kiểm tra email để xác nhận, rồi đăng nhập.','ok'); auMsg.className='msg ok'; auMsg.textContent='✅ Tạo tài khoản thành công! Hãy đăng nhập.'; auPass.value=''; authMode('login'); auBtn.disabled=false; return; }
@@ -858,7 +871,14 @@ function pwStrength(){
   fill.style.width=pct+'%'; fill.style.background=col;
   hint.textContent=txt; hint.style.color=col;
 }
-function genStrongPass(){
+function pwMatch(){
+    var h=document.getElementById('pw2Hint'); if(!h) return;
+    var p1=document.getElementById('auPass').value, p2=document.getElementById('auPass2').value;
+    if(!p2){ h.textContent=''; return; }
+    if(p1===p2){ h.textContent='✓ Mật khẩu khớp'; h.style.color='#16a34a'; }
+    else { h.textContent='✕ Mật khẩu chưa khớp'; h.style.color='#dc2626'; }
+  }
+  function genStrongPass(){
   var U='ABCDEFGHJKLMNPQRSTUVWXYZ',L='abcdefghijkmnpqrstuvwxyz',D='23456789',S='!@#$%&*?';
   function pick(set,n){var o='';var a=new Uint32Array(n);crypto.getRandomValues(a);for(var i=0;i<n;i++)o+=set[a[i]%set.length];return o;}
   var raw=pick(U,3)+pick(L,5)+pick(D,3)+pick(S,2);
