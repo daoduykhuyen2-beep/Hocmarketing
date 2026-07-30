@@ -720,7 +720,7 @@ async function daysBadge(catId){
     const col=d<=7?'#fbbf24':'#86efac';
     return ' <span style="color:'+col+';font-size:12px;font-weight:600">(Còn '+d+' ngày)</span>';
   }
-  function openMyCourses(){ if(!USER){openAuth('login');return;} openM('myModal');
+  async function openMyCourses(){ if(!USER){openAuth('login');return;} openM('myModal');
   const b=document.getElementById('myBody');
   await loadEnrollments();
   const owned=CATS.filter(c=>ENROLLED.has(c.id));
@@ -814,7 +814,7 @@ init();
     };
   }
 
-  function injectCompleteBtn(lessonId, canPlay){
+  async function injectCompleteBtn(lessonId, canPlay){
     const info = document.getElementById('modalTitle');
     const container = info ? info.parentElement : document.querySelector('#modal .modal-info');
     if(!container) return;
