@@ -447,6 +447,8 @@ function renderAccount(){
     area.innerHTML=`<button class="btn btn-ghost" onclick="openAuth('login')">Đăng nhập</button><button class="btn btn-primary" onclick="openAuth('register')">Đăng ký học</button>`;
     cta.innerHTML=`<button class="btn btn-primary btn-lg" onclick="openAuth('register')">🚀 Đăng ký học ngay</button><button class="btn btn-ghost btn-lg" onclick="openVip()">👑 Xem gói VIP</button>`;
   }
+
+  try{ensureNotifBell();}catch(e){}
 }
 function toggleMenu(e){e.stopPropagation();const m=document.getElementById('userMenu');
   m.innerHTML=`<div class="head"><div class="em">${esc(USER.email)}</div><div class="b">${fmtVND(PROFILE?.balance)}</div>${vipActive()?`<div class="hint">VIP đến ${new Date(PROFILE.vip_until).toLocaleDateString('vi-VN')}</div>`:''}</div>
