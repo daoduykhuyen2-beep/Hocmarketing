@@ -620,16 +620,16 @@ async function submitAuth(){
   try{
     if(authCur==='register'){
       if(auPass2.value!==pass){ msg.className='msg err'; msg.textContent='Mật khẩu xác nhận không khớp.'; auBtn.disabled=false; auBtn.textContent='Tạo tài khoản'; return; }
-      const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{full_name:auName.value.trim()}}});
+      const {data,error}=await sb.auth.signUp({email,password:pass,options:{emailRedirectTo:location.origin+'/?confirmed=1',data:{full_name:auName.value.trim()}}});
       if(error) throw error;
-      if(!data.session){ toast('✅ Đăng ký thành công! Kiểm tra email để xác nhận, rồi đăng nhập.','ok'); auMsg.className='msg ok'; auMsg.textContent='✅ Tạo tài khoản thành công! Hãy đăng nhập.'; auPass.value=''; authMode('login'); auBtn.disabled=false; return; }
+      if(!data.session){ toast('📩 Đăng ký thành công! Vui lòng mở Gmail và bấm vào link xác nhận. Sau khi xác nhận, bạn sẽ được đưa về trang chủ.','ok'); auMsg.className='msg ok'; auMsg.textContent='✅ Tạo tài khoản thành công! Hãy đăng nhập.'; auPass.value=''; authMode('login'); auBtn.disabled=false; return; }
       USER=data.user;
     }else{
       const {data,error}=await sb.auth.signInWithPassword({email,password:pass});
       if(error) throw error; USER=data.user;
     }
     await loadProfile(); await loadEnrollments(); renderAccount();
-    closeM('authModal'); toast('Xin chào '+ (USER.email) +' 👋','ok');
+    closeM('authModal'); toast('Xin chào '+ (USER.email) +' 👋','ok');try{pushNotif('Bạn đã đăng nhập vào tài khoản.','👋');}catch(e){}
     await loadCategories(); if(CURRENT) openCategory(CURRENT.id);
   }catch(e){ msg.className='msg err'; msg.textContent='✕ '+viErr(e.message); }
   auBtn.disabled=false; auBtn.textContent=authCur==='login'?'Đăng nhập':'Tạo tài khoản';
@@ -646,7 +646,7 @@ async function buyCourse(id){try{
   if(error){toast('Lỗi: '+error.message,'err');return;}
   if(!data.ok){ toast(data.message,'err'); if(data.need){openWallet();} return; }
   await loadProfile(); await loadEnrollments(); renderAccount();
-  toast('🎉 '+data.message,'ok'); openCategory(id); loadCategories();
+  toast('🎉 '+data.message,'ok');try{pushNotif(data.message,'🎉');}catch(e){} openCategory(id); loadCategories();
 }catch(_e){toast('⚠️ Có lỗi kết nối, vui lòng thử lại!','err');}}
 
 /* ---------- WALLET ---------- */
@@ -673,6 +673,7 @@ async function startTopup(){try{
   if(amt<10000){toast('Số tiền tối thiểu 10.000đ','err');return;}
   const {data,error}=await sb.rpc('create_topup',{amt});
   if(error){toast('Lỗi: '+error.message,'err');return;}
+  toast('✅ Đã tạo yêu cầu nạp tiền! Chuyển khoản theo hướng dẫn bên dưới, hệ thống sẽ cộng tiền sau khi nhận được.','ok');try{pushNotif('Bạn đã tạo yêu cầu nạp tiền.','💰');}catch(e){}
   if(!data.ok){toast(data.message,'err');return;}
   const bank=cfg.BANK_CODE||'MB', acc=cfg.BANK_ACCOUNT||'', name=cfg.BANK_ACCOUNT_NAME||'';
   const qr=`https://img.vietqr.io/image/${bank}-${acc}-compact2.png?amount=${amt}&addInfo=${encodeURIComponent(data.code)}&accountName=${encodeURIComponent(name)}`;
@@ -709,7 +710,7 @@ async function buyVip(id,name,price){try{
   if(error){toast('Lỗi: '+error.message,'err');return;}
   if(!data.ok){ toast(data.message,'err'); if(data.need){closeM('vipModal');openWallet();} return; }
   await loadProfile(); await loadEnrollments(); renderAccount();
-  toast('🎉 '+data.message,'ok'); closeM('vipModal'); loadCategories(); if(CURRENT)openCategory(CURRENT.id);
+  toast('🎉 '+data.message,'ok');try{pushNotif(data.message,'🎉');}catch(e){} closeM('vipModal'); loadCategories(); if(CURRENT)openCategory(CURRENT.id);
 }catch(_e){toast('⚠️ Có lỗi kết nối, vui lòng thử lại!','err');}}
 
 /* ---------- MY COURSES ---------- */
@@ -734,6 +735,86 @@ async function daysBadge(catId){
 function openM(id){document.getElementById(id).classList.add('open');}
 function closeM(id){document.getElementById(id).classList.remove('open');}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();['authModal','walletModal','vipModal','myModal'].forEach(closeM);}});
+
+
+/* ===== BỔ SUNG: xác nhận email, thông báo, click-outside ===== */
+function showConfirmedIfNeeded(){
+  try{
+    const u=new URL(location.href);
+    if(u.searchParams.get('confirmed')==='1'){
+      u.searchParams.delete('confirmed');
+      history.replaceState(null,'',u.pathname+(u.search||'')+u.hash);
+      setTimeout(function(){ toast('🎉 Xác nhận email thành công! Chào mừng bạn đến với Học Viện Marketing.','ok'); },400);
+    }
+  }catch(e){}
+}
+showConfirmedIfNeeded();
+
+let NOTIFS=[];
+function loadNotifs(){ try{ NOTIFS=JSON.parse(localStorage.getItem('hm_notifs')||'[]'); }catch(e){ NOTIFS=[]; } }
+function pushNotif(text,icon){
+  try{
+    NOTIFS.unshift({text:text,icon:icon||'🔔',t:Date.now()});
+    NOTIFS=NOTIFS.slice(0,30);
+    localStorage.setItem('hm_notifs',JSON.stringify(NOTIFS));
+    renderNotifBadge();
+  }catch(e){}
+}
+function renderNotifBadge(){
+  const b=document.getElementById('notifBadge'); if(!b) return;
+  const n=NOTIFS.length;
+  b.style.display=n? 'grid':'none'; b.textContent=n>9?'9+':n;
+}
+async function renderNotifMenu(){
+  const el=document.getElementById('notifList'); if(!el) return;
+  el.innerHTML='<div style="padding:16px;color:var(--muted);text-align:center">Đang tải...</div>';
+  let anns=[];
+  try{
+    const {data}=await sb.from('announcements').select('*').eq('active',true).order('created_at',{ascending:false});
+    anns=(data||[]).map(a=>({text:(a.title?a.title+': ':'')+(a.body||''),icon:'📢',t:new Date(a.created_at).getTime()}));
+  }catch(e){}
+  const all=[].concat(NOTIFS,anns).sort((x,y)=>y.t-x.t).slice(0,30);
+  if(!all.length){ el.innerHTML='<div style="padding:16px;color:var(--muted);text-align:center">Chưa có thông báo nào.</div>'; return; }
+  el.innerHTML=all.map(function(n){ return '<div style="display:flex;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line)"><span style="font-size:18px">'+(n.icon||'🔔')+'</span><div style="flex:1;min-width:0"><div style="font-size:13px;line-height:1.4">'+esc(n.text||'')+'</div><div style="font-size:11px;color:var(--muted);margin-top:2px">'+new Date(n.t).toLocaleString('vi-VN')+'</div></div></div>'; }).join('');
+}
+function toggleNotif(e){
+  if(e){ e.stopPropagation(); }
+  const m=document.getElementById('notifMenu'); if(!m) return;
+  const um=document.getElementById('userMenu'); if(um) um.classList.remove('open');
+  const willOpen=!m.classList.contains('open');
+  m.classList.toggle('open');
+  if(willOpen) renderNotifMenu();
+}
+function ensureNotifBell(){
+  if(document.getElementById('notifBell')) return;
+  const area=document.getElementById('accountArea'); if(!area) return;
+  const bell=document.createElement('div');
+  bell.id='notifBell'; bell.className='chip'; bell.style.cssText='position:relative;cursor:pointer;padding:8px 11px';
+  bell.setAttribute('onclick','toggleNotif(event)');
+  bell.innerHTML='🔔<span id="notifBadge" style="display:none;position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:#ef4444;color:#fff;font-size:11px;font-weight:800;place-items:center">0</span>';
+  area.insertBefore(bell, area.firstChild);
+  if(!document.getElementById('notifMenu')){
+    const menu=document.createElement('div');
+    menu.id='notifMenu'; menu.className='menu';
+    menu.style.cssText='max-width:340px;width:340px;max-height:60vh;overflow:auto;padding:0';
+    menu.innerHTML='<div style="padding:12px 14px;font-weight:800;border-bottom:1px solid var(--line)">🔔 Thông báo</div><div id="notifList"></div>';
+    document.body.appendChild(menu);
+  }
+  renderNotifBadge();
+}
+document.addEventListener('click',function(ev){
+  const um=document.getElementById('userMenu');
+  const nm=document.getElementById('notifMenu');
+  const inUser=ev.target.closest('#userMenu');
+  const inNotif=ev.target.closest('#notifMenu');
+  const isBell=ev.target.closest('#notifBell');
+  const isChip=ev.target.closest('.chip');
+  if(um && um.classList.contains('open') && !inUser && !(isChip && !isBell)) um.classList.remove('open');
+  if(nm && nm.classList.contains('open') && !inNotif && !isBell) nm.classList.remove('open');
+});
+document.addEventListener('keydown',function(ev){ if(ev.key==='Escape'){ const um=document.getElementById('userMenu'); const nm=document.getElementById('notifMenu'); if(um)um.classList.remove('open'); if(nm)nm.classList.remove('open'); }});
+loadNotifs();
+setTimeout(ensureNotifBell, 800);
 
 init();
 </script>
