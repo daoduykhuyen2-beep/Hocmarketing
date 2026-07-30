@@ -440,7 +440,7 @@ function renderAccount(){
   if(USER){
     const initial=(USER.email||'?')[0].toUpperCase();
     const vip=vipActive()?`<span class="vipflag">VIP</span>`:'';
-    area.innerHTML=`<a class="btn btn-ghost" href="admin.html">Quản trị</a>
+    area.innerHTML=`${(PROFILE&&PROFILE.is_admin)?`<a class="btn btn-ghost" href="admin.html">Quản trị</a>`:``}
       <div class="chip" onclick="toggleMenu(event)"><span class="bal">${fmtVND(PROFILE?.balance)}</span> ${vip} <span class="av">${initial}</span></div>`;
     cta.innerHTML=`<button class="btn btn-ok btn-lg" onclick="openWallet()">💰 Nạp tiền</button><button class="btn btn-ghost btn-lg" onclick="openVip()">👑 Xem gói VIP</button>`;
   }else{
