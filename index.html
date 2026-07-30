@@ -954,6 +954,32 @@ function pwStrength(){
   fill.style.width=pct+'%'; fill.style.background=col;
   hint.textContent=txt; hint.style.color=col;
 }
+
+function pwToggleInit(){
+  try{
+    var ids=['auPass','auPass2'];
+    ids.forEach(function(id){
+      var inp=document.getElementById(id);
+      if(!inp||inp.dataset.pwtog) return;
+      inp.dataset.pwtog='1';
+      var par=inp.parentElement;
+      if(getComputedStyle(par).position==='static'){ par.style.position='relative'; }
+      var b=document.createElement('button');
+      b.type='button';
+      b.setAttribute('aria-label','Hien mat khau');
+      b.textContent='Hien';
+      b.style.cssText='position:absolute;right:8px;top:50%;transform:translateY(-50%);background:transparent;border:0;cursor:pointer;font-size:12px;color:#2563eb;padding:2px 6px;z-index:5;';
+      b.onclick=function(){
+        if(inp.type==='password'){ inp.type='text'; b.textContent='An'; }
+        else { inp.type='password'; b.textContent='Hien'; }
+      };
+      inp.style.paddingRight='56px';
+      par.appendChild(b);
+    });
+  }catch(e){}
+}
+
+
 function pwMatch(){
     var h=document.getElementById('pw2Hint'); if(!h) return;
     var p1=document.getElementById('auPass').value, p2=document.getElementById('auPass2').value;
@@ -972,6 +998,8 @@ function pwMatch(){
     setTimeout(function(){try{navigator.clipboard.writeText(pw);}catch(e){}},50);
   }
 }
+
+try{ if(document.readyState!=="loading"){ pwToggleInit(); } else { document.addEventListener("DOMContentLoaded", pwToggleInit); } setInterval(function(){ try{pwToggleInit();}catch(e){} }, 1500); }catch(e){}
 </script>
 </body>
 </html>
