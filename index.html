@@ -607,11 +607,12 @@ function toggleSub(gi){
     const fallbackLibraryUrl = 'https://drive.google.com/drive/folders/1g2eddzoYdrDDwJMSHcrPW4d4WZMYPTNO';
     const openUrl = fallbackLibraryUrl;
     box.innerHTML=`<iframe src="${e.src}" allow="autoplay; fullscreen" allowfullscreen></iframe>`
-      + `<div class="video-fallback"><span>Video không phát? Mở kho video dự phòng đã được cấp quyền.</span> <a class="btn btn-ghost" href="${openUrl}" target="_blank" rel="noopener">▶ Mở kho video ↗</a></div>`;
+      + `<div class="video-fallback"><span>Video không phát?</span> <button class="btn btn-primary" onclick="openFallbackLibrary()">▶ Xem trong website</button> <a class="btn btn-ghost" href="${openUrl}" target="_blank" rel="noopener">Mở Drive ↗</a></div>`;
   }
   document.getElementById('modal').classList.add('open');
 }catch(_e){toast('⚠️ Có lỗi kết nối, vui lòng thử lại!','err');}}
 function closeModal(){document.getElementById('modal').classList.remove('open');document.getElementById('modalVideo').innerHTML='';}
+function openFallbackLibrary(){var box=document.getElementById('modalVideo');if(!box)return;box.innerHTML='<iframe src="https://drive.google.com/embeddedfolderview?id=1g2eddzoYdrDDwJMSHcrPW4d4WZMYPTNO#grid" allow="autoplay; fullscreen" allowfullscreen></iframe>'+'<div class="video-fallback"><span>Đang xem kho video trực tiếp trong website.</span></div>';}
 
 /* ---------- AUTH ---------- */
 let authCur='login';
