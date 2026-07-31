@@ -200,6 +200,9 @@
   .sub-count{font-size:13px;font-weight:700;color:var(--muted);background:rgba(255,255,255,.06);border:1px solid var(--line);padding:4px 10px;border-radius:999px;white-space:nowrap}
   .sub-body{display:none;padding:0 16px 16px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
   .subcourse.open .sub-body{display:grid}
+
+.video-fallback{display:flex;align-items:center;gap:10px;justify-content:center;padding:10px 12px;margin-top:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;font-size:14px;color:#cbd5e1;flex-wrap:wrap}
+.video-fallback span{opacity:.85}
 </style>
 </head>
 <body>
@@ -597,7 +600,14 @@ function toggleSub(gi){
   if(configured){ const {data}=await sb.rpc('get_video',{lesson:lessonId}); url=data; }
   if(!url){ toast('Không mở được video (cần mua khoá)','err'); return; }
   const e=toEmbed(url); const box=document.getElementById('modalVideo');
-  box.innerHTML = e.type==='video'?`<video src="${e.src}" controls autoplay playsinline></video>`:`<iframe src="${e.src}" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+  if(e.type==='video'){
+    box.innerHTML=`<video src="${e.src}" controls autoplay playsinline></video>`;
+  } else {
+    const dm=url.match(/drive\.google\.com\/file\/d\/([\w-]+)/);
+    const openUrl = dm ? `https://drive.google.com/file/d/${dm[1]}/view` : url;
+    box.innerHTML=`<iframe src="${e.src}" allow="autoplay; fullscreen" allowfullscreen></iframe>`
+      + `<div class="video-fallback"><span>Không xem được video?</span> <a class="btn btn-ghost" href="${openUrl}" target="_blank" rel="noopener">▶ Mở trong Google Drive ↗</a></div>`;
+  }
   document.getElementById('modal').classList.add('open');
 }catch(_e){toast('⚠️ Có lỗi kết nối, vui lòng thử lại!','err');}}
 function closeModal(){document.getElementById('modal').classList.remove('open');document.getElementById('modalVideo').innerHTML='';}
