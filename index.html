@@ -604,9 +604,10 @@ function toggleSub(gi){
     box.innerHTML=`<video src="${e.src}" controls autoplay playsinline></video>`;
   } else {
     const dm=url.match(/drive\.google\.com\/file\/d\/([\w-]+)/);
-    const openUrl = dm ? `https://drive.google.com/file/d/${dm[1]}/view` : url;
+    const fallbackLibraryUrl = 'https://drive.google.com/drive/folders/1g2eddzoYdrDDwJMSHcrPW4d4WZMYPTNO';
+    const openUrl = fallbackLibraryUrl;
     box.innerHTML=`<iframe src="${e.src}" allow="autoplay; fullscreen" allowfullscreen></iframe>`
-      + `<div class="video-fallback"><span>Không xem được video?</span> <a class="btn btn-ghost" href="${openUrl}" target="_blank" rel="noopener">▶ Mở trong Google Drive ↗</a></div>`;
+      + `<div class="video-fallback"><span>Video không phát? Mở kho video dự phòng đã được cấp quyền.</span> <a class="btn btn-ghost" href="${openUrl}" target="_blank" rel="noopener">▶ Mở kho video ↗</a></div>`;
   }
   document.getElementById('modal').classList.add('open');
 }catch(_e){toast('⚠️ Có lỗi kết nối, vui lòng thử lại!','err');}}
