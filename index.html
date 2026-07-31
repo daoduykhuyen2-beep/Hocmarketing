@@ -604,9 +604,7 @@ function toggleSub(gi){
     box.innerHTML=`<video src="${e.src}" controls autoplay playsinline></video>`;
   } else {
     const dm=url.match(/drive\.google\.com\/file\/d\/([\w-]+)/);
-    const inSiteEmbed = 'https://drive.google.com/embeddedfolderview?id=1g2eddzoYdrDDwJMSHcrPW4d4WZMYPTNO#grid';
-    box.innerHTML=`<iframe src="${inSiteEmbed}" allow="autoplay; fullscreen" allowfullscreen></iframe>`
-      + `<div class="video-fallback"><span>Chọn video trong kho học liệu để xem trực tiếp tại website.</span></div>`;
+    box.innerHTML=`<iframe src="${e.src}" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
   }
   document.getElementById('modal').classList.add('open');
 }catch(_e){toast('⚠️ Có lỗi kết nối, vui lòng thử lại!','err');}}
