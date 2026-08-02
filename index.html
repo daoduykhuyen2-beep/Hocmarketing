@@ -535,12 +535,12 @@ async function openCategory(id){
       if(!gmap[key]){gmap[key]={name:key,items:[]};groups.push(gmap[key]);}
       gmap[key].items.push(l);
     });
-    const cardHtml=(l)=>{
-      const canPlay=l.is_free||access;
+    const cardHtml=(l,li,arr)=>{
+      const canPlay=(li<(arr.length>10?3:2))||access;
       return `<div class="lesson" onclick="playLesson('${l.id}',${canPlay})">
         <div class="thumb">
           ${l.thumbnail_url?`<img src="${esc(l.thumbnail_url)}">`:''}
-          ${l.is_free?'<span class="free">Xem thử</span>':''}
+          ${(li<(arr.length>10?3:2))?'<span class="free">Xem thử</span>':''}
           ${canPlay?'<div class="play"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div>':'<div class="lockic">🔒</div>'}
           ${l.duration?`<span class="dur">${esc(l.duration)}</span>`:''}
         </div>
