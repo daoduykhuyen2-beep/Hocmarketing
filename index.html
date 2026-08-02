@@ -595,6 +595,7 @@ function toggleSub(gi){
     var wrap=box.closest('.subcourse'); if(wrap) wrap.classList.toggle('open');
   }
   async function playLesson(lessonId,canPlay){try{
+  if(!USER){ openAuth('login'); return; }
   if(!canPlay){ toast('🔒 Cần mua khoá để xem bài này','err'); return; }
   let url=null;
   if(configured){ const {data}=await sb.rpc('get_video',{lesson:lessonId}); url=data; }
