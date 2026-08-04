@@ -233,6 +233,27 @@
     <div id="catNotice"></div>
     <div id="catGrid" class="grid"><div class="empty">Đang tải…</div></div>
   </section>
+
+  <section class="section wrap" id="huong-dan">
+    <div class="section-head"><div><h2>Hướng dẫn sử dụng</h2><p>Cách nạp tiền, đăng ký gói và mở khoá để xem trọn bộ video.</p></div></div>
+    <div class="grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px">
+      <div class="card" style="padding:20px">
+        <div style="font-size:28px;margin-bottom:8px">1️⃣</div>
+        <h3 style="margin:0 0 8px">Nạp tiền vào ví</h3>
+        <p style="color:var(--muted,#9aa)">Đăng nhập, bấm vào ví (số dư) ở góc trên. Chọn nhanh mệnh giá hoặc nhập số tiền muốn nạp (tối thiểu 10.000đ) rồi bấm nạp — hệ thống hiện mã QR. Mở app ngân hàng quét mã QR, số tiền và nội dung chuyển khoản đã điền sẵn. Chuyển xong, số dư tự động cộng vào ví.</p>
+      </div>
+      <div class="card" style="padding:20px">
+        <div style="font-size:28px;margin-bottom:8px">2️⃣</div>
+        <h3 style="margin:0 0 8px">Đăng ký gói VIP</h3>
+        <p style="color:var(--muted,#9aa)">Bấm "Xem gói VIP", chọn gói phù hợp rồi bấm "Mua gói này". Nếu số dư đủ, hệ thống tự trừ tiền và kích hoạt VIP ngay. Nếu chưa đủ, hệ thống mở ví và hiện sẵn mã QR đúng số tiền còn thiếu để bạn nạp thêm, sau đó bấm mua lại là xong.</p>
+      </div>
+      <div class="card" style="padding:20px">
+        <div style="font-size:28px;margin-bottom:8px">3️⃣</div>
+        <h3 style="margin:0 0 8px">Mở khoá xem tiếp video</h3>
+        <p style="color:var(--muted,#9aa)">Khi có VIP còn hạn, tất cả các khoá tự mở — bạn xem trọn bộ video của mọi khoá. Với khoá lẻ đã mua, bạn xem toàn bộ video của khoá đó. Các bài "xem thử" đầu tệp luôn xem được sau khi đăng nhập.</p>
+      </div>
+    </div>
+  </section>
 </main>
 
 <!-- CATEGORY -->
@@ -720,7 +741,7 @@ async function buyVip(id,name,price){try{
   if(!confirm(`Mua ${name} với giá ${fmtVND(price)}?`))return;
   const {data,error}=await sb.rpc('purchase_vip',{pkg:id});
   if(error){toast('Lỗi: '+error.message,'err');return;}
-  if(!data.ok){ toast(data.message,'err'); if(data.need){closeM('vipModal');openWallet();} return; }
+  if(!data.ok){ toast(data.message,'err'); if(data.need){ closeM('vipModal'); await openWallet(); const inp=document.getElementById('topupAmount'); if(inp){ inp.value=data.need; if(typeof startTopup==='function') await startTopup(); } } return; }
   await loadProfile(); await loadEnrollments(); renderAccount();
   toast('🎉 '+data.message,'ok');try{pushNotif(data.message,'🎉');}catch(e){} closeM('vipModal'); loadCategories(); if(CURRENT)openCategory(CURRENT.id);
 }catch(_e){toast('⚠️ Có lỗi kết nối, vui lòng thử lại!','err');}}
