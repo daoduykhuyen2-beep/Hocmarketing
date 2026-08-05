@@ -285,11 +285,8 @@
     <div class="field"><label>Email</label><input id="auEmail" type="email" placeholder="ban@email.com"></div>
     <div class="field"><label>Mật khẩu</label>
       <div style="position:relative">
-        <input id="auPass" type="password" placeholder="••••••••" oninput="pwStrength()" style="padding-right:96px">
-        <button type="button" onclick="genStrongPass()" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:12px;padding:4px 8px;border:1px solid #ccc;border-radius:6px;background:#f5f5f5;cursor:pointer">Tạo mạnh</button>
+        <input id="auPass" type="password" placeholder="••••••••" style="padding-right:64px">
       </div>
-      <div id="pwBar" style="height:6px;border-radius:4px;background:#eee;margin-top:6px;overflow:hidden"><div id="pwBarFill" style="height:100%;width:0;transition:.25s"></div></div>
-      <div id="pwHint" style="font-size:12px;margin-top:4px;color:#888"></div>
     </div>
     <div class="field" id="pass2Field" style="display:none"><label>Xác nhận mật khẩu</label>
       <input id="auPass2" type="password" placeholder="Nhập lại mật khẩu" oninput="pwMatch()">
@@ -970,22 +967,6 @@ init();
 </style>
 
 <script>
-function pwStrength(){
-  var v=(document.getElementById('auPass')||{}).value||'';
-  var s=0;
-  if(v.length>=8)s++; if(v.length>=12)s++;
-  if(/[a-z]/.test(v)&&/[A-Z]/.test(v))s++;
-  if(/[0-9]/.test(v))s++;
-  if(/[^A-Za-z0-9]/.test(v))s++;
-  var fill=document.getElementById('pwBarFill'), hint=document.getElementById('pwHint');
-  if(!fill)return;
-  var pct=[0,20,40,60,80,100][Math.min(s,5)];
-  var col=s<=1?'#e74c3c':s<=2?'#e67e22':s<=3?'#f1c40f':s<=4?'#2ecc71':'#27ae60';
-  var txt=v?(s<=1?'Rất yếu':s<=2?'Yếu':s<=3?'Trung bình':s<=4?'Mạnh':'Rất mạnh'):'';
-  fill.style.width=pct+'%'; fill.style.background=col;
-  hint.textContent=txt; hint.style.color=col;
-}
-
 function pwToggleInit(){
   try{
     var ids=['auPass','auPass2'];
@@ -1018,17 +999,6 @@ function pwMatch(){
     if(p1===p2){ h.textContent='✓ Mật khẩu khớp'; h.style.color='#16a34a'; }
     else { h.textContent='✕ Mật khẩu chưa khớp'; h.style.color='#dc2626'; }
   }
-  function genStrongPass(){
-  var U='ABCDEFGHJKLMNPQRSTUVWXYZ',L='abcdefghijkmnpqrstuvwxyz',D='23456789',S='!@#$%&*?';
-  function pick(set,n){var o='';var a=new Uint32Array(n);crypto.getRandomValues(a);for(var i=0;i<n;i++)o+=set[a[i]%set.length];return o;}
-  var raw=pick(U,3)+pick(L,5)+pick(D,3)+pick(S,2);
-  var arr=raw.split('');var rr=new Uint32Array(arr.length);crypto.getRandomValues(rr);
-  for(var i=arr.length-1;i>0;i--){var j=rr[i]%(i+1);var tmp=arr[i];arr[i]=arr[j];arr[j]=tmp;}
-  var pw=arr.join('');
-  var inp=document.getElementById('auPass'); if(inp){inp.type='text'; inp.value=pw; pwStrength();
-    setTimeout(function(){try{navigator.clipboard.writeText(pw);}catch(e){}},50);
-  }
-}
 
 try{ if(document.readyState!=="loading"){ pwToggleInit(); } else { document.addEventListener("DOMContentLoaded", pwToggleInit); } setInterval(function(){ try{pwToggleInit();}catch(e){} }, 1500); }catch(e){}
 </script>
