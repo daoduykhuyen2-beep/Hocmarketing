@@ -295,11 +295,31 @@
     <label id="rememberField" style="display:flex;align-items:center;gap:8px;font-size:14px;margin:4px 0 12px;cursor:pointer;color:var(--muted,#888)">
       <input id="auRemember" type="checkbox" checked style="width:16px;height:16px;cursor:pointer"> Ghi nhớ đăng nhập
     </label>
+    <div id="forgotWrap" style="text-align:right;margin:-6px 0 10px"><a href="#" onclick="forgotPassword();return false" style="font-size:13px;color:#2563eb;text-decoration:none">Quên mật khẩu?</a></div>
     <button class="btn btn-primary btn-block btn-lg" id="auBtn" onclick="submitAuth()">Đăng nhập</button>
     <div class="msg" id="auMsg"></div>
   </div>
 </div>
 
+<!-- RESET PASSWORD MODAL -->
+<div class="modal" id="resetModal" onclick="if(event.target===this)closeM('resetModal')">
+  <div class="pcard">
+    <div class="phead"><h3>Đặt lại mật khẩu</h3><button class="close" onclick="closeM('resetModal')">✕</button></div>
+    <p style="font-size:14px;color:var(--muted,#888);margin:0 0 12px">Nhập mật khẩu mới cho tài khoản của bạn.</p>
+    <div class="field"><label>Mật khẩu mới</label>
+      <div style="position:relative">
+        <input id="rsPass" type="password" placeholder="••••••••" style="padding-right:64px">
+      </div>
+    </div>
+    <div class="field"><label>Xác nhận mật khẩu mới</label>
+      <div style="position:relative">
+        <input id="rsPass2" type="password" placeholder="Nhập lại mật khẩu" style="padding-right:64px">
+      </div>
+    </div>
+    <button class="btn btn-primary btn-block btn-lg" id="rsBtn" onclick="submitReset()">Cập nhật mật khẩu</button>
+    <div class="msg" id="rsMsg"></div>
+  </div>
+</div>
 <!-- WALLET MODAL -->
 <div class="modal" id="walletModal" onclick="if(event.target===this)closeM('walletModal')">
   <div class="pcard wide">
@@ -445,7 +465,7 @@ async function init(){
     try{ if(localStorage.getItem('au_no_remember')==='1' && !sessionStorage.getItem('au_alive')){ await sb.auth.signOut(); } sessionStorage.setItem('au_alive','1'); }catch(_e){}
     const {data:{session}} = await sb.auth.getSession();
     if(session){ USER=session.user; await loadProfile(); await loadEnrollments(); }
-    sb.auth.onAuthStateChange((_e,s)=>{ /* giữ đồng bộ khi refresh token */ });
+    sb.auth.onAuthStateChange((_e,s)=>{ if(_e==='PASSWORD_RECOVERY'){ try{ openM('resetModal'); }catch(_x){} } });
   }
   renderAccount();
   await loadCategories();
@@ -640,6 +660,7 @@ function authMode(m){authCur=m;
   auBtn.textContent=m==='login'?'Đăng nhập':'Tạo tài khoản';
   var _p2=document.getElementById('pass2Field'); if(_p2) _p2.style.display=m==='register'?'block':'none';
   var _rm=document.getElementById('rememberField'); if(_rm) _rm.style.display=m==='login'?'flex':'none';
+  var _fw=document.getElementById('forgotWrap'); if(_fw) _fw.style.display=m==='login'?'block':'none';
   var _p2h=document.getElementById('pw2Hint'); if(_p2h) _p2h.textContent='';
 }
 async function submitAuth(){
@@ -663,6 +684,34 @@ async function submitAuth(){
     await loadCategories(); if(CURRENT) openCategory(CURRENT.id);
   }catch(e){ msg.className='msg err'; msg.textContent='✕ '+viErr(e.message); }
   auBtn.disabled=false; auBtn.textContent=authCur==='login'?'Đăng nhập':'Tạo tài khoản';
+}
+async function forgotPassword(){
+  if(!configured){toast('Hãy cấu hình Supabase','err');return;}
+  var email=(document.getElementById('auEmail').value||'').trim();
+  if(!email){ email=(prompt('Nhập email của bạn để nhận link đặt lại mật khẩu:')||'').trim(); }
+  if(!email) return;
+  var msg=document.getElementById('auMsg'); if(msg){ msg.className='msg'; msg.textContent='Đang gửi email…'; }
+  try{
+    const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+'/?recovery=1'});
+    if(error) throw error;
+    if(msg){ msg.className='msg'; msg.textContent='📧 Đã gửi link đặt lại mật khẩu! Vui lòng mở Gmail (kiểm tra cả mục Spam).'; }
+    toast('📧 Đã gửi email đặt lại mật khẩu','ok');
+  }catch(e){ if(msg){ msg.className='msg err'; msg.textContent='✕ '+viErr(e.message); } }
+}
+async function submitReset(){
+  var p1=(document.getElementById('rsPass').value||''), p2=(document.getElementById('rsPass2').value||'');
+  var msg=document.getElementById('rsMsg'); msg.className='msg';
+  if(!p1||p1.length<6){ msg.className='msg err'; msg.textContent='Mật khẩu phải từ 6 ký tự trở lên.'; return; }
+  if(p1!==p2){ msg.className='msg err'; msg.textContent='Mật khẩu xác nhận không khớp.'; return; }
+  var btn=document.getElementById('rsBtn'); btn.disabled=true; btn.textContent='Đang cập nhật…';
+  try{
+    const {error}=await sb.auth.updateUser({password:p1});
+    if(error) throw error;
+    closeM('resetModal');
+    toast('✅ Đổi mật khẩu thành công! Bạn đã đăng nhập.','ok');
+    try{ history.replaceState(null,'',location.pathname); }catch(_e){}
+  }catch(e){ msg.className='msg err'; msg.textContent='✕ '+viErr(e.message); }
+  btn.disabled=false; btn.textContent='Cập nhật mật khẩu';
 }
 function viErr(m){if(/Invalid login/i.test(m))return'Sai email hoặc mật khẩu.';if(/already registered/i.test(m))return'Email đã được đăng ký.';if(/at least 6/i.test(m))return'Mật khẩu tối thiểu 6 ký tự.';return m;}
 async function logout(){ await sb.auth.signOut(); USER=null;PROFILE=null;ENROLLED=new Set(); renderAccount(); await loadCategories(); showHome(); toast('Đã đăng xuất'); }
@@ -771,6 +820,11 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();['auth
 function showConfirmedIfNeeded(){
   try{
     const u=new URL(location.href);
+    if(u.searchParams.get('recovery')==='1' || /type=recovery/.test(location.hash)){
+      u.searchParams.delete('recovery');
+      try{ history.replaceState(null,'',u.pathname+(u.search||'')); }catch(_e){}
+      setTimeout(function(){ try{ openM('resetModal'); }catch(_x){} },600);
+    }
     if(u.searchParams.get('confirmed')==='1'){
       u.searchParams.delete('confirmed');
       history.replaceState(null,'',u.pathname+(u.search||'')+u.hash);
@@ -969,7 +1023,7 @@ init();
 <script>
 function pwToggleInit(){
   try{
-    var ids=['auPass','auPass2'];
+    var ids=['auPass','auPass2','rsPass','rsPass2'];
     ids.forEach(function(id){
       var inp=document.getElementById(id);
       if(!inp||inp.dataset.pwtog) return;
